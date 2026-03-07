@@ -226,3 +226,20 @@ Project: Tektronix Graphics Terminal
   - EraserTool uses callbacks instead of setCommandCallback: setGetCommandsCallback and setRemoveCommandCallback
   - Hover highlighting uses COLORS.highlight from colors.js
 ---
+
+## 2026-03-07 - US-016
+- What was implemented: Complete CSS styling with dark theme and all UI components
+- Files changed:
+  - css/style.css - comprehensive styling for entire app
+- **Learnings for future iterations:**
+  - CSS uses custom properties for all colors and layout dimensions (--tek-*, --toolbar-width, etc.)
+  - Layout structure: .app-container > .app-header + .app-main (contains .toolbar + .canvas-wrapper) + .status-bar
+  - Toolbar 48px wide, status bar 32px tall, header 40px tall
+  - Tool options panel (.options-panel) slides out from toolbar with .open class
+  - Button styles: .tool-btn for toolbar icons, .btn for regular buttons, .btn-primary for emphasis
+  - Form controls styled: range sliders, checkboxes with custom .checkmark, select dropdowns
+  - Gallery styles: .gallery-container, .demo-grid, .demo-card, .player-view
+  - Responsive adjustments at 900px width and 700px height breakpoints
+  - Tooltips via [data-tooltip] attribute with ::after pseudo-element
+  - Min dimensions enforced: 800x600px
+---
