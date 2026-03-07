@@ -257,3 +257,18 @@ Project: Tektronix Graphics Terminal
   - Hidden #file-input for file open dialog
   - All SVG icons are inline with viewBox="0 0 24 24" and stroke styling from CSS
 ---
+
+## 2026-03-07 - US-018
+- What was implemented: Wire up app.js with tool switching and keyboard shortcuts
+- Files changed:
+  - js/app.js - added tool button click handlers, keyboard shortcuts, active tool highlighting
+  - css/style.css - added pointer-events handling for options panel
+- **Learnings for future iterations:**
+  - Tool buttons use data-tool attribute to identify which tool to switch to
+  - switchTool() helper function handles both ToolManager.setActiveTool() and UI button highlighting
+  - Keyboard shortcuts: L=Line, R=Rect, C=Circle, A=Arc, T=Text, F=Fill, E=Eraser
+  - Ctrl+Z/Ctrl+Shift+Z for undo/redo (check both e.ctrlKey and e.shiftKey)
+  - G toggles grid checkbox by setting .checked and dispatching 'change' event
+  - Space pauses/resumes animation via animator.pause()/resume() with isPaused check
+  - Options panel needs pointer-events: none when closed to avoid blocking canvas clicks
+---
