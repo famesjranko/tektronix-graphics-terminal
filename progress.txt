@@ -331,3 +331,18 @@ Project: Tektronix Graphics Terminal
   - clearCanvas() exposed on window for debugging and future clear button
   - ToolManager.loadCommands(commands, false) loads instantly without animation
 ---
+
+## 2026-03-07 - US-023
+- What was implemented: File save/load for .tek.json format with toast notifications
+- Files changed:
+  - js/utils/storage.js - added saveToFile() and loadFromFile() functions with validateTekFile()
+  - js/app.js - wired up Save/Open buttons, added Ctrl+S/Ctrl+O shortcuts, added showToast() function
+  - css/style.css - added toast notification styles (.toast, .toast.show, .toast.error, .toast.success)
+- **Learnings for future iterations:**
+  - File format: {version: 1, created, modified, canvasAspect, commands: [...]}
+  - saveToFile() creates blob URL and triggers download via temporary anchor element
+  - loadFromFile() uses Promise to handle async file reading, returns {success, commands, error}
+  - Toast notification uses transform + opacity transition for smooth slide-up animation
+  - Hidden file input (#file-input) already exists in index.html with accept=".tek.json,.json"
+  - Remember to URL.revokeObjectURL() after download to prevent memory leaks
+---
