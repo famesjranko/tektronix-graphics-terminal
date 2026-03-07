@@ -11,6 +11,7 @@ import { ToolManager } from './tools/ToolManager.js';
 import { LineTool } from './tools/LineTool.js';
 import { RectTool } from './tools/RectTool.js';
 import { CircleTool } from './tools/CircleTool.js';
+import { ArcTool } from './tools/ArcTool.js';
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
@@ -58,6 +59,12 @@ document.addEventListener('DOMContentLoaded', () => {
     toolManager.addCommand(cmd);
   });
   toolManager.registerTool(circleTool);
+
+  const arcTool = new ArcTool(tekCanvas, renderer);
+  arcTool.setCommandCallback((cmd) => {
+    toolManager.addCommand(cmd);
+  });
+  toolManager.registerTool(arcTool);
 
   // Set line tool as default active tool
   toolManager.setActiveTool('line');
@@ -140,6 +147,10 @@ document.addEventListener('DOMContentLoaded', () => {
       toolManager.setActiveTool('circle');
       return;
     }
+    if (key === 'a') {
+      toolManager.setActiveTool('arc');
+      return;
+    }
 
     // Pass to active tool
     const tool = toolManager.getActiveTool();
@@ -148,5 +159,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  console.log('Tools registered: LineTool (L), RectTool (R), CircleTool (C) - ready for drawing');
+  console.log('Tools registered: LineTool (L), RectTool (R), CircleTool (C), ArcTool (A) - ready for drawing');
 });
