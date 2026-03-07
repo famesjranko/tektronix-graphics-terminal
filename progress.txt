@@ -17,6 +17,7 @@ Project: Tektronix Graphics Terminal
 - ToolManager: use addCommand(cmd) to add to history and queue animation, undo()/redo() for history
 - Tools: extend BaseTool, use setCommandCallback(fn) to emit commands to ToolManager
 - Mouse events: attach to animationCanvas, convert coords with toNormalized(), pass to active tool
+- Fonts: import from ./fonts/hershey.js - HERSHEY_FONT object, getCharData(), textToCommands()
 
 ---
 
@@ -158,4 +159,19 @@ Project: Tektronix Graphics Terminal
   - Arc command format: {type: 'arc', cx, cy, radius, startAngle, endAngle, color}
   - PlotAnimator already supports arc commands with progressive animation along the arc
   - VectorRenderer.drawArc expects angles in radians
+---
+
+## 2026-03-07 - US-012
+- What was implemented: Hershey Simplex vector font data for text rendering
+- Files changed:
+  - js/fonts/hershey.js - new file with stroke-based font data
+- **Learnings for future iterations:**
+  - HERSHEY_FONT object maps characters to {width, strokes} where strokes are [[x1,y1,x2,y2], ...]
+  - Coordinates normalized with character height = 1, widths vary per character (typically 0.3-0.9)
+  - Includes A-Z, 0-9, punctuation, and many additional symbols
+  - Lowercase letters map to uppercase (same glyphs)
+  - Helper functions: getCharData(char), measureText(text, spacing), textToCommands(text, x, y, scale, spacing)
+  - textToCommands() returns array of line commands ready for PlotAnimator
+  - baseHeight is 0.03 in normalized coords, scale parameter multiplies this
+  - Unknown characters render as placeholder box
 ---
