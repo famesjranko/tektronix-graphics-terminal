@@ -16,6 +16,7 @@ import { TextTool } from './tools/TextTool.js';
 import { FillTool } from './tools/FillTool.js';
 import { EraserTool } from './tools/EraserTool.js';
 import { loadFromLocalStorage, clearLocalStorage, createAutoSave, saveToFile, loadFromFile } from './utils/storage.js';
+import { exportPNG } from './utils/export.js';
 
 // Storage keys
 const TOOL_OPTIONS_KEY = 'tektronix-tool-options';
@@ -506,6 +507,62 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Export modal elements
+  const exportModal = document.getElementById('export-modal');
+  const exportModalClose = document.getElementById('export-modal-close');
+  const exportTransparentCheckbox = document.getElementById('export-transparent');
+
+  // Open export modal
+  function openExportModal() {
+    const commands = toolManager.getCommands();
+    if (commands.length === 0) {
+      showToast('Nothing to export', 'info');
+      return;
+    }
+    exportModal.classList.add('open');
+  }
+
+  // Close export modal
+  function closeExportModal() {
+    exportModal.classList.remove('open');
+  }
+
+  // Export button handler - opens modal
+  document.getElementById('btn-export').addEventListener('click', openExportModal);
+
+  // Modal close button
+  exportModalClose.addEventListener('click', closeExportModal);
+
+  // Close modal on overlay click
+  exportModal.addEventListener('click', (e) => {
+    if (e.target === exportModal) {
+      closeExportModal();
+    }
+  });
+
+  // Close modal on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && exportModal.classList.contains('open')) {
+      closeExportModal();
+    }
+  });
+
+  // PNG export handlers
+  async function handlePNGExport(scale) {
+    const transparent = exportTransparentCheckbox.checked;
+    try {
+      await exportPNG(tekCanvas, { scale, transparent });
+      closeExportModal();
+      showToast('PNG exported successfully', 'success');
+    } catch (err) {
+      showToast('Export failed: ' + err.message, 'error');
+    }
+  }
+
+  document.getElementById('export-png').addEventListener('click', () => handlePNGExport(1));
+  document.getElementById('export-png-1x').addEventListener('click', () => handlePNGExport(1));
+  document.getElementById('export-png-2x').addEventListener('click', () => handlePNGExport(2));
+
   // Speed slider functionality
   const speedSlider = document.getElementById('speed-slider');
   const speedLabel = document.getElementById('speed-label');
@@ -568,6 +625,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.ctrlKey && e.key === 'o') {
       e.preventDefault();
       document.getElementById('btn-open').click();
+      return;
+    }
+
+    // Export: Ctrl+E
+    if (e.ctrlKey && e.key === 'e') {
+      e.preventDefault();
+      openExportModal();
       return;
     }
 

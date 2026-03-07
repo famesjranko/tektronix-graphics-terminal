@@ -346,3 +346,19 @@ Project: Tektronix Graphics Terminal
   - Hidden file input (#file-input) already exists in index.html with accept=".tek.json,.json"
   - Remember to URL.revokeObjectURL() after download to prevent memory leaks
 ---
+
+## 2026-03-08 - US-024
+- What was implemented: PNG export with scale and background options
+- Files changed:
+  - js/utils/export.js - new file with exportPNG() function
+  - index.html - added export modal with PNG/SVG buttons and options
+  - css/style.css - added modal overlay and export modal styles
+  - js/app.js - wired up export button, modal handlers, Ctrl+E shortcut
+- **Learnings for future iterations:**
+  - exportPNG(tekCanvas, {scale, transparent}) takes TekCanvas instance and options
+  - Uses tekCanvas.persistentCanvas directly for source (physical pixel dimensions)
+  - Scales from source canvas (CSS size * dpr) to export size (CSS size * scale)
+  - Filename format: tektronix-{ISO timestamp with dashes}.png
+  - Modal uses .open class for visibility, closes on overlay click or Escape key
+  - SVG button disabled until US-025 is implemented
+---

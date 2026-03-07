@@ -105,6 +105,39 @@
   <!-- Hidden file input for Open dialog -->
   <input type="file" id="file-input" accept=".tek.json,.json" class="hidden">
 
+  <!-- Export Modal -->
+  <div class="modal-overlay" id="export-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Export Drawing</h3>
+        <button class="modal-close" id="export-modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="export-option">
+          <span class="export-option-label">Format</span>
+          <div class="export-buttons">
+            <button class="btn" id="export-png">PNG Image</button>
+            <button class="btn" id="export-svg" disabled data-tooltip="Coming soon">SVG Vector</button>
+          </div>
+        </div>
+        <div class="export-option">
+          <span class="export-option-label">PNG Options</span>
+          <div class="export-buttons">
+            <button class="btn" id="export-png-1x">1x Scale</button>
+            <button class="btn" id="export-png-2x">2x Scale</button>
+          </div>
+        </div>
+        <div class="export-option">
+          <label class="checkbox-container">
+            <input type="checkbox" id="export-transparent">
+            <span class="checkmark"></span>
+            <span class="checkbox-label">Transparent background</span>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script type="module" src="js/app.js"></script>
 </body>
 </html>
