@@ -191,3 +191,21 @@ Project: Tektronix Graphics Terminal
   - Text command format: {type: 'text', x, y, text, scale, color}
   - setScale(scale) method allows changing text size (for future tool options panel)
 ---
+
+## 2026-03-07 - US-014
+- What was implemented: FillTool for pattern fills using flood-fill algorithm
+- Files changed:
+  - js/tools/FillTool.js - new file extending BaseTool with flood fill and pattern generation
+  - js/canvas/PlotAnimator.js - added fill command handling with line-by-line animation
+  - js/tools/ToolManager.js - added fill and text command handling in _drawCommand, imported textToCommands
+  - js/app.js - registered FillTool, added 'F' keyboard shortcut
+- **Learnings for future iterations:**
+  - FillTool uses flood fill on canvas pixel data to find connected empty regions
+  - Empty pixels detected by low brightness (<30) or low alpha (<50)
+  - Fill patterns are stored as arrays of line commands for replay/undo/redo
+  - Fill command format: {type: 'fill', x, y, pattern, color, lines: [...]}
+  - Pattern lines generated via scanline approach: find spans of filled pixels and draw lines within them
+  - Available patterns: horizontal, vertical, diagonal45, diagonal135, crosshatch, dots
+  - setPattern(pattern) allows changing fill pattern (for future tool options panel)
+  - ToolManager._drawCommand needed textToCommands import for text command handling during undo/redo
+---
