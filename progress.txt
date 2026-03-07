@@ -362,3 +362,21 @@ Project: Tektronix Graphics Terminal
   - Modal uses .open class for visibility, closes on overlay click or Escape key
   - SVG button disabled until US-025 is implemented
 ---
+
+## 2026-03-08 - US-025
+- What was implemented: SVG export for vector graphics output
+- Files changed:
+  - js/utils/export.js - added exportSVG() function and commandToSVG() helper
+  - js/app.js - imported exportSVG, wired up SVG button click handler
+  - index.html - enabled SVG export button (removed disabled attribute)
+- **Learnings for future iterations:**
+  - exportSVG(commands, width, height, {transparent}) converts commands to SVG elements
+  - SVG uses viewBox matching canvas dimensions for proper aspect ratio
+  - Inline CSS with .tek-primary and .tek-background classes
+  - Command types map to SVG: line→<line>, rect→<rect>, circle→<circle>, arc→<path d="M...A...">, text→multiple <line> elements via textToCommands
+  - Filled shapes use fill attribute, strokes use stroke attribute
+  - Line styles (dashed, dotted) map to stroke-dasharray
+  - Arc uses SVG path arc command: A rx ry rotation large-arc-flag sweep-flag x y
+  - Text is converted to line strokes using the hershey.js textToCommands function
+  - Fill patterns are stored as .lines array on fill commands
+---
