@@ -132,3 +132,16 @@ Project: Tektronix Graphics Terminal
   - VectorRenderer.drawRect expects x, y, width, height in normalized 0-1 coords
   - PlotAnimator already supports rect commands with perimeter animation
 ---
+
+## 2026-03-07 - US-010
+- What was implemented: CircleTool for drawing circles with bounding box interaction
+- Files changed:
+  - js/tools/CircleTool.js - new file extending BaseTool
+  - js/app.js - registered CircleTool, added 'C' keyboard shortcut
+- **Learnings for future iterations:**
+  - CircleTool follows same pattern as RectTool: click-drag bounding box
+  - Circle inscribed: center = box center, radius = min(width, height) / 2
+  - Circle command format: {type: 'circle', cx, cy, radius, filled: false, color}
+  - PlotAnimator already supports circle commands with arc animation (circumference draws progressively)
+  - VectorRenderer.drawCircle expects radius relative to canvas width (normalized)
+---
