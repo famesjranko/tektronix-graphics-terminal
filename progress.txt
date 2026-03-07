@@ -463,3 +463,24 @@ Project: Tektronix Graphics Terminal
   - Arrow drawing uses Math.atan2 for direction calculation with configurable arrowhead angles
   - technicalDemos array exported as default for GalleryManager integration
 ---
+
+## 2026-03-08 - US-031
+- What was implemented: GalleryManager class for loading and managing gallery demos
+- Files changed:
+  - js/gallery/GalleryManager.js - new file with GalleryManager class
+  - js/gallery-app.js - updated to use GalleryManager with test output
+- **Learnings for future iterations:**
+  - GalleryManager imports all demo modules (geometric, threed, data, maps, technical)
+  - Demo arrays exported as named exports (geometricDemos, threedDemos, etc.) and default exports
+  - CATEGORY_INFO object defines display names and sort order for categories
+  - getAllDemos() returns copy of internal demos array
+  - getCategories() returns array of {id, name} objects sorted by predefined order
+  - getDemosByCategory(cat) filters demos by category string
+  - getDemoById(id) uses Map for O(1) lookup
+  - generateThumbnail(demo, options) creates offscreen canvas, draws commands directly without animation
+  - generateThumbnailDataURL() convenience method returns PNG data URL
+  - Thumbnail rendering uses simple coordinate conversion (normalized 0-1 to pixels)
+  - Text commands are skipped in thumbnails since they need hershey font
+  - Fill commands use pre-computed .lines array stored on the command
+  - Additional helper methods: getDemoCount(), getCategoryCount(category)
+---
