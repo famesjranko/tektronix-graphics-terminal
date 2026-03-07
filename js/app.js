@@ -49,8 +49,6 @@ function saveToolOptions(options) {
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('Tektronix Graphics Terminal initializing...');
-
   // Get container and create TekCanvas
   const container = document.getElementById('canvas-container');
   const tekCanvas = new TekCanvas(container);
@@ -58,25 +56,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const animator = new PlotAnimator(tekCanvas, renderer);
   const toolManager = new ToolManager(tekCanvas, renderer, animator);
 
-  // Store globally for debugging (will be removed in final polish)
-  window.tekCanvas = tekCanvas;
-  window.renderer = renderer;
-  window.animator = animator;
-  window.toolManager = toolManager;
-
   // Create auto-save function (debounced 1sec)
   const triggerAutoSave = createAutoSave(() => toolManager.getCommands(), 1000);
-
-  console.log('TekCanvas initialized:', {
-    width: tekCanvas.getWidth(),
-    height: tekCanvas.getHeight(),
-    dpr: tekCanvas.dpr
-  });
-
-  // Listen for animation complete
-  animator.addEventListener('complete', () => {
-    console.log('Animation complete');
-  });
 
   // Create and register tools
   const lineTool = new LineTool(tekCanvas, renderer);
@@ -447,21 +428,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load commands from gallery transfer
     try {
       const commands = JSON.parse(galleryCommands);
-      console.log(`Loading ${commands.length} commands from gallery`);
       toolManager.loadCommands(commands, false);
       // Clear sessionStorage after loading
       sessionStorage.removeItem(galleryTransferKey);
       // Save to localStorage so it persists
       triggerAutoSave();
-    } catch (err) {
-      console.error('Failed to parse gallery transfer commands:', err);
+    } catch {
       sessionStorage.removeItem(galleryTransferKey);
     }
   } else {
     // Auto-load saved drawing from localStorage
     const savedCommands = loadFromLocalStorage();
     if (savedCommands && savedCommands.length > 0) {
-      console.log(`Restoring ${savedCommands.length} commands from localStorage`);
       toolManager.loadCommands(savedCommands, false);
     }
   }
@@ -726,6 +704,4 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
   });
-
-  console.log('Tools registered: LineTool (L), RectTool (R), CircleTool (C), ArcTool (A), TextTool (T), FillTool (F), EraserTool (E) - ready for drawing');
 });

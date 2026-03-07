@@ -85,8 +85,6 @@ function init() {
 
   // Listen for hash changes (browser back/forward)
   window.addEventListener('hashchange', handleUrlHash);
-
-  console.log('Tektronix Gallery initialized');
 }
 
 /**
@@ -257,12 +255,10 @@ function setupOpenInEditor() {
     const sessionKey = 'tektronix-gallery-transfer';
     try {
       sessionStorage.setItem(sessionKey, JSON.stringify(commands));
-      console.log(`Stored ${commands.length} commands for transfer to editor`);
 
       // Redirect to the editor (index.html)
       window.location.href = 'index.html';
-    } catch (err) {
-      console.error('Failed to store commands in sessionStorage:', err);
+    } catch {
       alert('Failed to open in editor. The demo may be too large.');
     }
   });
@@ -294,27 +290,30 @@ function openDemo(demoId) {
   // Clear canvas container
   clearElement(playerCanvasContainer);
 
-  // Create new player
-  player = new GraphicPlayer(demo, playerCanvasContainer);
-
-  // Listen for complete event
-  player.addEventListener('complete', () => {
-    updatePlayPauseButton(false);
-  });
-
-  // Set initial speed from slider
-  const speedIndex = parseInt(speedSlider.value, 10);
-  player.setSpeed(SPEED_VALUES[speedIndex]);
-
   // Render parameter sliders
   renderParamSliders(demo);
 
-  // Show player view
+  // Show player view FIRST so container has dimensions
   galleryMain.classList.add('player-active');
 
-  // Start playback
-  player.play();
-  updatePlayPauseButton(true);
+  // Wait for layout to settle before creating player (setTimeout ensures layout is complete)
+  setTimeout(() => {
+    // Create new player (now container has proper dimensions)
+    player = new GraphicPlayer(demo, playerCanvasContainer);
+
+    // Listen for complete event
+    player.addEventListener('complete', () => {
+      updatePlayPauseButton(false);
+    });
+
+    // Set initial speed from slider
+    const speedIndex = parseInt(speedSlider.value, 10);
+    player.setSpeed(SPEED_VALUES[speedIndex]);
+
+    // Start playback
+    player.play();
+    updatePlayPauseButton(true);
+  }, 50);
 }
 
 /**
