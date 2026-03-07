@@ -10,6 +10,7 @@ import { PlotAnimator } from './canvas/PlotAnimator.js';
 import { ToolManager } from './tools/ToolManager.js';
 import { LineTool } from './tools/LineTool.js';
 import { RectTool } from './tools/RectTool.js';
+import { CircleTool } from './tools/CircleTool.js';
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
@@ -51,6 +52,12 @@ document.addEventListener('DOMContentLoaded', () => {
     toolManager.addCommand(cmd);
   });
   toolManager.registerTool(rectTool);
+
+  const circleTool = new CircleTool(tekCanvas, renderer);
+  circleTool.setCommandCallback((cmd) => {
+    toolManager.addCommand(cmd);
+  });
+  toolManager.registerTool(circleTool);
 
   // Set line tool as default active tool
   toolManager.setActiveTool('line');
@@ -129,6 +136,10 @@ document.addEventListener('DOMContentLoaded', () => {
       toolManager.setActiveTool('rect');
       return;
     }
+    if (key === 'c') {
+      toolManager.setActiveTool('circle');
+      return;
+    }
 
     // Pass to active tool
     const tool = toolManager.getActiveTool();
@@ -137,5 +148,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  console.log('Tools registered: LineTool (L), RectTool (R) - ready for drawing');
+  console.log('Tools registered: LineTool (L), RectTool (R), CircleTool (C) - ready for drawing');
 });
