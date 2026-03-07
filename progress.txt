@@ -317,3 +317,17 @@ Project: Tektronix Graphics Terminal
   - Speed state stored in localStorage with key 'tektronix-speed'
   - Use 'input' event (not 'change') on slider for real-time updates during drag
 ---
+
+## 2026-03-07 - US-022
+- What was implemented: localStorage auto-save with debounced save and auto-load
+- Files changed:
+  - js/utils/storage.js - new file with saveToLocalStorage, loadFromLocalStorage, clearLocalStorage, createAutoSave
+  - js/app.js - integrated auto-save on all command changes, auto-load on page init, clearCanvas function
+- **Learnings for future iterations:**
+  - Storage key is 'tektronix-drawing' for the command array
+  - createAutoSave(getCommands, delay) returns a debounced trigger function
+  - Auto-save triggers on: new commands from all tools, eraser removal, undo/redo
+  - Auto-load happens after grid setup so grid callback is already registered
+  - clearCanvas() exposed on window for debugging and future clear button
+  - ToolManager.loadCommands(commands, false) loads instantly without animation
+---
