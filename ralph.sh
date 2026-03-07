@@ -91,9 +91,8 @@ for i in $(seq 1 $MAX_ITERATIONS); do
   if [[ "$TOOL" == "amp" ]]; then
     OUTPUT=$(cat "$SCRIPT_DIR/prompt.md" | amp --dangerously-allow-all 2>&1 | tee /dev/stderr) || true
   else
-    # Claude Code: use -p to pass prompt, --dangerously-skip-permissions for autonomous operation
-    PROMPT=$(cat "$SCRIPT_DIR/CLAUDE.md")
-    OUTPUT=$(claude --dangerously-skip-permissions -p "$PROMPT" 2>&1 | tee /dev/stderr) || true
+    # Claude Code: pipe prompt via stdin, --print for non-interactive mode
+    OUTPUT=$(cat "$SCRIPT_DIR/CLAUDE.md" | claude --dangerously-skip-permissions --print 2>&1 | tee /dev/stderr) || true
   fi
 
   # Check for completion signal
