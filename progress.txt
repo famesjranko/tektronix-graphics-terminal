@@ -305,3 +305,15 @@ Project: Tektronix Graphics Terminal
   - Position display shows rounded pixel coordinates, clears to 'X: --- Y: ---' on mouseleave
   - When clearing/redrawing canvas, grid must be redrawn first (via onBeforeDraw callback)
 ---
+
+## 2026-03-07 - US-021
+- What was implemented: Speed slider control with 5 stops and localStorage persistence
+- Files changed:
+  - js/app.js - added speed slider wiring with SPEED_VALUES, SPEED_LABELS, updateSpeed(), localStorage save/load
+- **Learnings for future iterations:**
+  - Speed slider uses indices 0-4 mapped to values [100, 300, 800, 2000, Infinity]
+  - Speed labels: ['Slowest', 'Slow', 'Normal', 'Fast', 'Instant']
+  - PlotAnimator.setSpeed(pxPerSec) updates animation speed in real-time
+  - Speed state stored in localStorage with key 'tektronix-speed'
+  - Use 'input' event (not 'change') on slider for real-time updates during drag
+---

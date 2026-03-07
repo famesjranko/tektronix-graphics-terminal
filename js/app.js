@@ -19,6 +19,12 @@ import { EraserTool } from './tools/EraserTool.js';
 // Storage keys
 const TOOL_OPTIONS_KEY = 'tektronix-tool-options';
 const GRID_STATE_KEY = 'tektronix-grid-enabled';
+const SPEED_KEY = 'tektronix-speed';
+
+// Speed slider settings (5 stops)
+const SPEED_VALUES = [100, 300, 800, 2000, Infinity];
+const SPEED_LABELS = ['Slowest', 'Slow', 'Normal', 'Fast', 'Instant'];
+const DEFAULT_SPEED_INDEX = 2; // Normal (800 px/sec)
 
 // Load saved tool options from localStorage
 function loadToolOptions() {
@@ -415,6 +421,39 @@ document.addEventListener('DOMContentLoaded', () => {
     // Redraw all commands (callback handles grid)
     const commands = toolManager.getCommands();
     toolManager.loadCommands(commands, false);
+  });
+
+  // Speed slider functionality
+  const speedSlider = document.getElementById('speed-slider');
+  const speedLabel = document.getElementById('speed-label');
+
+  // Update speed label and animator
+  function updateSpeed(index) {
+    const speed = SPEED_VALUES[index];
+    const label = SPEED_LABELS[index];
+    speedLabel.textContent = label;
+    animator.setSpeed(speed);
+  }
+
+  // Load saved speed state
+  const savedSpeedIndex = localStorage.getItem(SPEED_KEY);
+  if (savedSpeedIndex !== null) {
+    const index = parseInt(savedSpeedIndex, 10);
+    if (index >= 0 && index < SPEED_VALUES.length) {
+      speedSlider.value = index;
+      updateSpeed(index);
+    }
+  } else {
+    // Apply default
+    updateSpeed(DEFAULT_SPEED_INDEX);
+  }
+
+  // Handle speed slider change
+  speedSlider.addEventListener('input', () => {
+    const index = parseInt(speedSlider.value, 10);
+    updateSpeed(index);
+    // Save to localStorage
+    localStorage.setItem(SPEED_KEY, index);
   });
 
   // Handle keyboard shortcuts
