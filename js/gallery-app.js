@@ -1,138 +1,441 @@
 /**
  * Tektronix Graphics Terminal - Gallery Application
  *
- * This is the entry point for the gallery page.
+ * Wires up the gallery page functionality:
+ * - Thumbnail grid rendering
+ * - Category filtering
+ * - Demo playback with GraphicPlayer
+ * - URL-based direct linking
  */
 
-import { COLORS } from './utils/colors.js';
 import { GalleryManager } from './gallery/GalleryManager.js';
 import { GraphicPlayer } from './gallery/GraphicPlayer.js';
 
-// Log startup to verify module loading works
-console.log('Tektronix Gallery initializing...');
-console.log('Color palette loaded:', COLORS);
+// Speed settings (same as main app)
+const SPEED_VALUES = [100, 300, 800, 2000, Infinity];
+const SPEED_LABELS = ['Slowest', 'Slow', 'Normal', 'Fast', 'Instant'];
 
-// Initialize GalleryManager
-const galleryManager = new GalleryManager();
+// State
+let galleryManager;
+let player = null;
+let currentCategory = 'all';
 
-// Test GalleryManager methods
-console.log('--- GalleryManager Tests ---');
+// DOM elements
+let demoGrid;
+let playerView;
+let galleryMain;
+let categoryTabs;
+let playerTitle;
+let playerCanvasContainer;
+let paramSlidersContainer;
+let playPauseBtn;
+let playIcon;
+let pauseIcon;
+let restartBtn;
+let backBtn;
+let speedSlider;
+let speedLabel;
+let openInEditorBtn;
 
-// Test getAllDemos()
-const allDemos = galleryManager.getAllDemos();
-console.log(`getAllDemos(): ${allDemos.length} total demos`);
+/**
+ * Clear all children from an element
+ * @param {HTMLElement} element
+ */
+function clearElement(element) {
+  while (element.firstChild) {
+    element.removeChild(element.firstChild);
+  }
+}
 
-// Test getCategories()
-const categories = galleryManager.getCategories();
-console.log('getCategories():', categories);
+/**
+ * Initialize the gallery application
+ */
+function init() {
+  // Get DOM elements
+  demoGrid = document.getElementById('demo-grid');
+  playerView = document.getElementById('player-view');
+  galleryMain = document.querySelector('.gallery-main');
+  categoryTabs = document.getElementById('category-tabs');
+  playerTitle = document.getElementById('player-title');
+  playerCanvasContainer = document.getElementById('player-canvas-container');
+  paramSlidersContainer = document.getElementById('param-sliders');
+  playPauseBtn = document.getElementById('play-pause-btn');
+  playIcon = document.getElementById('play-icon');
+  pauseIcon = document.getElementById('pause-icon');
+  restartBtn = document.getElementById('restart-btn');
+  backBtn = document.getElementById('back-btn');
+  speedSlider = document.getElementById('player-speed');
+  speedLabel = document.getElementById('player-speed-label');
+  openInEditorBtn = document.getElementById('open-in-editor-btn');
 
-// Test getDemosByCategory() for each category
-for (const category of categories) {
-  const demos = galleryManager.getDemosByCategory(category.id);
-  console.log(`getDemosByCategory('${category.id}'): ${demos.length} demos`);
-  demos.forEach(demo => {
-    console.log(`  - ${demo.id}: ${demo.name}`);
+  // Initialize GalleryManager
+  galleryManager = new GalleryManager();
+
+  // Render initial thumbnail grid
+  renderThumbnailGrid('all');
+
+  // Set up event listeners
+  setupCategoryTabs();
+  setupPlayerControls();
+  setupBackButton();
+  setupOpenInEditor();
+
+  // Check URL for direct demo link
+  handleUrlHash();
+
+  // Listen for hash changes (browser back/forward)
+  window.addEventListener('hashchange', handleUrlHash);
+
+  console.log('Tektronix Gallery initialized');
+}
+
+/**
+ * Render the thumbnail grid for a category
+ * @param {string} category - 'all' or a specific category ID
+ */
+function renderThumbnailGrid(category) {
+  // Clear existing grid
+  clearElement(demoGrid);
+
+  // Get demos to display
+  const demos = category === 'all'
+    ? galleryManager.getAllDemos()
+    : galleryManager.getDemosByCategory(category);
+
+  if (demos.length === 0) {
+    const emptyState = document.createElement('div');
+    emptyState.className = 'empty-state';
+    emptyState.textContent = 'No demos in this category';
+    demoGrid.appendChild(emptyState);
+    return;
+  }
+
+  // Create cards for each demo
+  for (const demo of demos) {
+    const card = createDemoCard(demo);
+    demoGrid.appendChild(card);
+  }
+}
+
+/**
+ * Create a demo card element
+ * @param {Object} demo - Demo object
+ * @returns {HTMLElement}
+ */
+function createDemoCard(demo) {
+  const card = document.createElement('div');
+  card.className = 'demo-card';
+  card.dataset.demoId = demo.id;
+
+  // Thumbnail container
+  const thumbnailContainer = document.createElement('div');
+  thumbnailContainer.className = 'demo-thumbnail';
+
+  // Generate thumbnail canvas
+  const thumbnailCanvas = galleryManager.generateThumbnail(demo, {
+    width: 200,
+    height: 150,
+    maxCommands: 500
+  });
+  thumbnailContainer.appendChild(thumbnailCanvas);
+
+  // Info section
+  const info = document.createElement('div');
+  info.className = 'demo-info';
+
+  const name = document.createElement('div');
+  name.className = 'demo-name';
+  name.textContent = demo.name;
+
+  const categoryLabel = document.createElement('div');
+  categoryLabel.className = 'demo-category';
+  // Get display name for category
+  const categories = galleryManager.getCategories();
+  const catInfo = categories.find(c => c.id === demo.category);
+  categoryLabel.textContent = catInfo ? catInfo.name : demo.category;
+
+  info.appendChild(name);
+  info.appendChild(categoryLabel);
+
+  card.appendChild(thumbnailContainer);
+  card.appendChild(info);
+
+  // Click to open player
+  card.addEventListener('click', () => {
+    openDemo(demo.id);
+  });
+
+  return card;
+}
+
+/**
+ * Set up category tab click handlers
+ */
+function setupCategoryTabs() {
+  const tabs = categoryTabs.querySelectorAll('.category-tab');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      // Update active state
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      // Filter demos
+      currentCategory = tab.dataset.category;
+      renderThumbnailGrid(currentCategory);
+    });
   });
 }
 
-// Test getDemoById() with first demo
-const firstDemo = allDemos[0];
-const foundDemo = galleryManager.getDemoById(firstDemo.id);
-console.log(`getDemoById('${firstDemo.id}'):`, foundDemo ? foundDemo.name : 'NOT FOUND');
+/**
+ * Set up player control event handlers
+ */
+function setupPlayerControls() {
+  // Play/Pause button
+  playPauseBtn.addEventListener('click', () => {
+    if (!player) return;
 
-// Test getDemoById() with invalid ID
-const notFound = galleryManager.getDemoById('invalid-demo-id');
-console.log(`getDemoById('invalid-demo-id'):`, notFound === null ? 'null (correct)' : 'ERROR');
+    if (player.getIsPlaying()) {
+      player.pause();
+      updatePlayPauseButton(false);
+    } else {
+      player.play();
+      updatePlayPauseButton(true);
+    }
+  });
 
-// Test generateThumbnail() - create a sample thumbnail
-console.log('Testing generateThumbnail()...');
-const thumbnailCanvas = galleryManager.generateThumbnail(firstDemo);
-console.log(`Thumbnail generated: ${thumbnailCanvas.width}x${thumbnailCanvas.height} (physical pixels)`);
+  // Restart button
+  restartBtn.addEventListener('click', () => {
+    if (!player) return;
+    player.restart();
+    updatePlayPauseButton(true);
+  });
 
-// Test generateThumbnailDataURL()
-const dataURL = galleryManager.generateThumbnailDataURL(firstDemo);
-console.log(`Thumbnail data URL length: ${dataURL.length} chars`);
+  // Speed slider
+  speedSlider.addEventListener('input', () => {
+    const index = parseInt(speedSlider.value, 10);
+    const speed = SPEED_VALUES[index];
+    speedLabel.textContent = SPEED_LABELS[index];
 
-// Test getDemoCount() and getCategoryCount()
-console.log(`getDemoCount(): ${galleryManager.getDemoCount()}`);
-for (const category of categories) {
-  console.log(`getCategoryCount('${category.id}'): ${galleryManager.getCategoryCount(category.id)}`);
+    if (player) {
+      player.setSpeed(speed);
+    }
+  });
 }
 
-console.log('--- GalleryManager Tests Complete ---');
-
-// Test GraphicPlayer
-console.log('--- GraphicPlayer Tests ---');
-
-// Create a test container for the player
-// Use the player canvas container from the new gallery layout
-const playerContainer = document.getElementById('player-canvas-container');
-if (!playerContainer) {
-  console.error('Player container not found - make sure gallery.html is updated');
+/**
+ * Set up back button handler
+ */
+function setupBackButton() {
+  backBtn.addEventListener('click', () => {
+    closePlayer();
+  });
 }
 
-// Create player with the first demo
-const testDemo = allDemos[0];
-console.log(`Creating GraphicPlayer with demo: ${testDemo.name}`);
-
-const player = new GraphicPlayer(testDemo, playerContainer);
-console.log('GraphicPlayer created');
-
-// Test getDemo()
-console.log(`getDemo(): ${player.getDemo().name}`);
-
-// Test getParams()
-console.log('getParams():', player.getParams());
-
-// Test getParamDefinitions()
-console.log('getParamDefinitions():', player.getParamDefinitions());
-
-// Test setSpeed()
-player.setSpeed(800);
-console.log(`setSpeed(800) - getSpeed(): ${player.getSpeed()}`);
-
-// Test play state methods
-console.log(`getIsPlaying() before play: ${player.getIsPlaying()}`);
-console.log(`getIsPaused() before play: ${player.getIsPaused()}`);
-
-// Listen for complete event
-player.addEventListener('complete', () => {
-  console.log('GraphicPlayer emitted "complete" event');
-});
-
-// Start playback
-console.log('Calling play()...');
-player.play();
-console.log(`getIsPlaying() after play: ${player.getIsPlaying()}`);
-
-// Test pause after 1 second
-setTimeout(() => {
-  console.log('Calling pause() after 1s...');
-  player.pause();
-  console.log(`getIsPlaying() after pause: ${player.getIsPlaying()}`);
-  console.log(`getIsPaused() after pause: ${player.getIsPaused()}`);
-
-  // Test resume after another second
-  setTimeout(() => {
-    console.log('Calling play() to resume...');
-    player.play();
-    console.log(`getIsPlaying() after resume: ${player.getIsPlaying()}`);
-  }, 1000);
-}, 1000);
-
-// Update player title in the UI
-const playerTitle = document.getElementById('player-title');
-if (playerTitle) {
-  playerTitle.textContent = testDemo.name;
+/**
+ * Set up "Open in Editor" button (placeholder for US-035)
+ */
+function setupOpenInEditor() {
+  openInEditorBtn.addEventListener('click', () => {
+    // This will be implemented in US-035
+    // For now, show a message
+    console.log('Open in Editor - will be implemented in US-035');
+    alert('This feature will be available soon!');
+  });
 }
 
-// Show player view for testing
-const galleryMain = document.querySelector('.gallery-main');
-if (galleryMain) {
+/**
+ * Open a demo in the player view
+ * @param {string} demoId - Demo ID to open
+ */
+function openDemo(demoId) {
+  const demo = galleryManager.getDemoById(demoId);
+  if (!demo) {
+    console.error(`Demo not found: ${demoId}`);
+    return;
+  }
+
+  // Update URL hash
+  updateUrlHash(demoId);
+
+  // Update title
+  playerTitle.textContent = demo.name;
+
+  // Destroy existing player if any
+  if (player) {
+    player.destroy();
+    player = null;
+  }
+
+  // Clear canvas container
+  clearElement(playerCanvasContainer);
+
+  // Create new player
+  player = new GraphicPlayer(demo, playerCanvasContainer);
+
+  // Listen for complete event
+  player.addEventListener('complete', () => {
+    updatePlayPauseButton(false);
+  });
+
+  // Set initial speed from slider
+  const speedIndex = parseInt(speedSlider.value, 10);
+  player.setSpeed(SPEED_VALUES[speedIndex]);
+
+  // Render parameter sliders
+  renderParamSliders(demo);
+
+  // Show player view
   galleryMain.classList.add('player-active');
+
+  // Start playback
+  player.play();
+  updatePlayPauseButton(true);
 }
 
-console.log('--- GraphicPlayer Tests Running (check console for async results) ---');
-console.log('Gallery page loaded with new HTML structure. Full UI wiring in US-034.');
+/**
+ * Close the player view and return to grid
+ */
+function closePlayer() {
+  // Clear URL hash
+  history.pushState(null, '', window.location.pathname);
 
-// Placeholder - Full gallery UI will be wired up in US-034
+  // Hide player view
+  galleryMain.classList.remove('player-active');
+
+  // Destroy player
+  if (player) {
+    player.destroy();
+    player = null;
+  }
+
+  // Clear param sliders
+  clearElement(paramSlidersContainer);
+}
+
+/**
+ * Render parameter sliders for a demo
+ * @param {Object} demo - Demo object
+ */
+function renderParamSliders(demo) {
+  clearElement(paramSlidersContainer);
+
+  const paramDefs = demo.params || {};
+  const paramEntries = Object.entries(paramDefs);
+
+  if (paramEntries.length === 0) {
+    return; // No parameters for this demo
+  }
+
+  for (const [name, param] of paramEntries) {
+    const slider = createParamSlider(name, param);
+    paramSlidersContainer.appendChild(slider);
+  }
+}
+
+/**
+ * Create a parameter slider element
+ * @param {string} name - Parameter name
+ * @param {Object} param - Parameter definition
+ * @returns {HTMLElement}
+ */
+function createParamSlider(name, param) {
+  const container = document.createElement('div');
+  container.className = 'param-slider';
+
+  const label = document.createElement('label');
+  label.htmlFor = `param-${name}`;
+  label.textContent = param.label || name;
+
+  const input = document.createElement('input');
+  input.type = 'range';
+  input.id = `param-${name}`;
+  input.min = param.min;
+  input.max = param.max;
+  input.value = param.default;
+  input.step = param.step || 0.01;
+
+  const valueDisplay = document.createElement('span');
+  valueDisplay.className = 'param-value';
+  valueDisplay.textContent = formatParamValue(param.default);
+
+  // Update on input
+  input.addEventListener('input', () => {
+    const value = parseFloat(input.value);
+    valueDisplay.textContent = formatParamValue(value);
+
+    if (player) {
+      player.setParam(name, value);
+      updatePlayPauseButton(true); // restart sets playing to true
+    }
+  });
+
+  container.appendChild(label);
+  container.appendChild(input);
+  container.appendChild(valueDisplay);
+
+  return container;
+}
+
+/**
+ * Format a parameter value for display
+ * @param {number} value
+ * @returns {string}
+ */
+function formatParamValue(value) {
+  // Display up to 2 decimal places, but remove trailing zeros
+  return parseFloat(value.toFixed(2)).toString();
+}
+
+/**
+ * Update the play/pause button icon
+ * @param {boolean} isPlaying
+ */
+function updatePlayPauseButton(isPlaying) {
+  if (isPlaying) {
+    playIcon.classList.add('hidden');
+    pauseIcon.classList.remove('hidden');
+  } else {
+    playIcon.classList.remove('hidden');
+    pauseIcon.classList.add('hidden');
+  }
+}
+
+/**
+ * Update the URL hash with the demo ID
+ * @param {string} demoId
+ */
+function updateUrlHash(demoId) {
+  history.pushState(null, '', `#demo=${demoId}`);
+}
+
+/**
+ * Handle URL hash for direct linking
+ */
+function handleUrlHash() {
+  const hash = window.location.hash;
+
+  if (hash.startsWith('#demo=')) {
+    const demoId = hash.substring(6); // Remove '#demo='
+    const demo = galleryManager.getDemoById(demoId);
+
+    if (demo) {
+      // Open the demo
+      openDemo(demoId);
+    } else {
+      console.warn(`Demo not found in URL: ${demoId}`);
+      // Clear invalid hash
+      history.replaceState(null, '', window.location.pathname);
+    }
+  } else if (galleryMain && galleryMain.classList.contains('player-active')) {
+    // Hash cleared but player still showing - close it
+    closePlayer();
+  }
+}
+
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
