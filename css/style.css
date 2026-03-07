@@ -809,6 +809,79 @@ a:hover {
   text-transform: uppercase;
 }
 
+.param-slider .param-value {
+  font-size: 11px;
+  color: var(--tek-primary);
+  min-width: 40px;
+  text-align: right;
+}
+
+/* Gallery main content area */
+.gallery-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Player header spacer for flexbox */
+.player-header-spacer {
+  flex: 1;
+}
+
+/* Player view when active hides the grid */
+.gallery-main .demo-grid {
+  display: grid;
+}
+
+.gallery-main.player-active .demo-grid {
+  display: none;
+}
+
+.gallery-main.player-active .player-view {
+  display: flex;
+}
+
+/* Player canvas container styling */
+.player-canvas-area {
+  background-color: var(--tek-background);
+}
+
+.player-canvas-area .canvas-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/* Player control buttons */
+.player-controls .btn-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Loading state for demo grid */
+.demo-grid-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--tek-dim);
+  font-size: 14px;
+}
+
+/* Empty state when no demos match filter */
+.demo-grid-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--tek-dim);
+  font-size: 14px;
+}
+
 /* ==========================================================================
    Responsive Adjustments
    ========================================================================== */

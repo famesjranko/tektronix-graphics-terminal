@@ -65,14 +65,11 @@ console.log('--- GalleryManager Tests Complete ---');
 console.log('--- GraphicPlayer Tests ---');
 
 // Create a test container for the player
-const galleryContainer = document.getElementById('gallery-container');
-const playerContainer = document.createElement('div');
-playerContainer.style.width = '600px';
-playerContainer.style.height = '400px';
-playerContainer.style.position = 'relative';
-playerContainer.style.margin = '20px auto';
-playerContainer.style.border = '1px solid var(--tek-border)';
-galleryContainer.appendChild(playerContainer);
+// Use the player canvas container from the new gallery layout
+const playerContainer = document.getElementById('player-canvas-container');
+if (!playerContainer) {
+  console.error('Player container not found - make sure gallery.html is updated');
+}
 
 // Create player with the first demo
 const testDemo = allDemos[0];
@@ -123,24 +120,19 @@ setTimeout(() => {
   }, 1000);
 }, 1000);
 
-// Add controls display using safe DOM methods
-const controlsDiv = document.createElement('div');
-controlsDiv.style.textAlign = 'center';
-controlsDiv.style.marginTop = '10px';
+// Update player title in the UI
+const playerTitle = document.getElementById('player-title');
+if (playerTitle) {
+  playerTitle.textContent = testDemo.name;
+}
 
-const titleP = document.createElement('p');
-titleP.style.color = 'var(--tek-text)';
-titleP.textContent = `Playing: ${testDemo.name}`;
-controlsDiv.appendChild(titleP);
-
-const infoP = document.createElement('p');
-infoP.style.color = 'var(--tek-dim)';
-infoP.style.fontSize = '0.9em';
-infoP.textContent = 'Check console for GraphicPlayer test output';
-controlsDiv.appendChild(infoP);
-
-galleryContainer.appendChild(controlsDiv);
+// Show player view for testing
+const galleryMain = document.querySelector('.gallery-main');
+if (galleryMain) {
+  galleryMain.classList.add('player-active');
+}
 
 console.log('--- GraphicPlayer Tests Running (check console for async results) ---');
+console.log('Gallery page loaded with new HTML structure. Full UI wiring in US-034.');
 
 // Placeholder - Full gallery UI will be wired up in US-034
