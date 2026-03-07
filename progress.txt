@@ -3,6 +3,23 @@ Started: 2026-03-07
 Project: Tektronix Graphics Terminal
 
 ## Codebase Patterns
-(Add reusable patterns here as they are discovered)
+- Use ES6 modules with `<script type="module">` in HTML
+- Import colors from `./utils/colors.js` - exports COLORS object and DEFAULT_COLOR
+- CSS variables match JS constants: --tek-primary = COLORS.primary
 
+---
+
+## 2026-03-07 - US-001
+- What was implemented: Project scaffolding with HTML entry points, CSS, and JS directory structure
+- Files changed:
+  - index.html - main canvas page with container div
+  - gallery.html - gallery page with header and main container
+  - css/style.css - CSS reset and color variables
+  - js/utils/colors.js - color palette constants
+  - js/app.js - main entry point (placeholder)
+  - js/gallery-app.js - gallery entry point (placeholder)
+- **Learnings for future iterations:**
+  - Both HTML files use `<script type="module">` for ES6 imports
+  - Canvas container uses id="canvas-container" - TekCanvas will create canvases inside
+  - Color palette available in both CSS (variables) and JS (COLORS export)
 ---
