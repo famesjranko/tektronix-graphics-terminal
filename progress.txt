@@ -15,6 +15,8 @@ Project: Tektronix Graphics Terminal
 - PlotAnimator takes TekCanvas and VectorRenderer in constructor
 - ToolManager: takes TekCanvas, VectorRenderer, and PlotAnimator in constructor
 - ToolManager: use addCommand(cmd) to add to history and queue animation, undo()/redo() for history
+- Tools: extend BaseTool, use setCommandCallback(fn) to emit commands to ToolManager
+- Mouse events: attach to animationCanvas, convert coords with toNormalized(), pass to active tool
 
 ---
 
@@ -102,4 +104,18 @@ Project: Tektronix Graphics Terminal
   - getCommands() - returns copy of commandHistory for save/export
   - loadCommands(commands, animate) - for restoring from file/localStorage
   - _redrawAll() - clears canvas and redraws all commands instantly (for undo/redo)
+---
+
+## 2026-03-07 - US-008
+- What was implemented: LineTool for drawing lines with click-drag-release interaction
+- Files changed:
+  - js/tools/LineTool.js - new file extending BaseTool
+  - js/app.js - wired up ToolManager, LineTool, mouse events, and keyboard shortcuts
+- **Learnings for future iterations:**
+  - LineTool uses setCommandCallback(fn) to emit commands to ToolManager
+  - Mouse events on animationCanvas convert to normalized coords via toNormalized()
+  - Preview line drawn on animation layer, cleared each frame during drag
+  - Minimum movement threshold (0.001) prevents accidental single-click lines
+  - Keyboard shortcuts: use e.key.toLowerCase() for consistent Shift+key handling
+  - mouseleave also triggers onMouseUp to handle dragging outside canvas
 ---
