@@ -13,6 +13,8 @@ Project: Tektronix Graphics Terminal
 - VectorRenderer uses _crisp() for sharp 1px lines (Math.floor(coord) + 0.5)
 - PlotAnimator: use enqueue(command) to add commands, extends EventTarget for 'complete' event
 - PlotAnimator takes TekCanvas and VectorRenderer in constructor
+- ToolManager: takes TekCanvas, VectorRenderer, and PlotAnimator in constructor
+- ToolManager: use addCommand(cmd) to add to history and queue animation, undo()/redo() for history
 
 ---
 
@@ -84,4 +86,20 @@ Project: Tektronix Graphics Terminal
   - getPreviewContext() returns animation layer context for drawing previews
   - clearPreview() clears the animation canvas layer
   - setColor(color) sets the drawing color for the tool
+---
+
+## 2026-03-07 - US-007
+- What was implemented: ToolManager class for tool registration, switching, and undo/redo
+- Files changed:
+  - js/tools/ToolManager.js - new file with ToolManager class
+- **Learnings for future iterations:**
+  - ToolManager takes TekCanvas, VectorRenderer, and PlotAnimator in constructor
+  - registerTool(tool) - registers by tool.name
+  - setActiveTool(name) - deactivates current, activates new tool
+  - addCommand(cmd) - adds to commandHistory, clears undoStack, queues for animation
+  - undo() - pops from commandHistory, pushes to undoStack, redraws all
+  - redo() - pops from undoStack, pushes to commandHistory, redraws all
+  - getCommands() - returns copy of commandHistory for save/export
+  - loadCommands(commands, animate) - for restoring from file/localStorage
+  - _redrawAll() - clears canvas and redraws all commands instantly (for undo/redo)
 ---
