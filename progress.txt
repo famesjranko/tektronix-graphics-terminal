@@ -3,6 +3,589 @@ Started: 2026-03-07
 Project: Tektronix Graphics Terminal
 
 ## Codebase Patterns
-(Add reusable patterns here as they are discovered)
+- Use ES6 modules with `<script type="module">` in HTML
+- Import colors from `./utils/colors.js` - exports COLORS object and DEFAULT_COLOR
+- EraserTool uses different callbacks than drawing tools: setGetCommandsCallback and setRemoveCommandCallback
+- CSS variables match JS constants: --tek-primary = COLORS.primary
+- TekCanvas: getPersistentContext() for final drawings, getAnimationContext() for previews
+- Coordinates: toNormalized(x,y) and fromNormalized(x,y) convert between pixels and 0-1 range
+- TekCanvas exports getWidth()/getHeight() for sizing calculations
+- VectorRenderer: pass context + normalized coords, handles pixel conversion internally
+- VectorRenderer uses _crisp() for sharp 1px lines (Math.floor(coord) + 0.5)
+- PlotAnimator: use enqueue(command) to add commands, extends EventTarget for 'complete' event
+- PlotAnimator takes TekCanvas and VectorRenderer in constructor
+- ToolManager: takes TekCanvas, VectorRenderer, and PlotAnimator in constructor
+- ToolManager: use addCommand(cmd) to add to history and queue animation, undo()/redo() for history
+- Tools: extend BaseTool, use setCommandCallback(fn) to emit commands to ToolManager
+- Mouse events: attach to animationCanvas, convert coords with toNormalized(), pass to active tool
+- Fonts: import from ./fonts/hershey.js - HERSHEY_FONT object, getCharData(), textToCommands()
 
+---
+
+## 2026-03-07 - US-001
+- What was implemented: Project scaffolding with HTML entry points, CSS, and JS directory structure
+- Files changed:
+  - index.html - main canvas page with container div
+  - gallery.html - gallery page with header and main container
+  - css/style.css - CSS reset and color variables
+  - js/utils/colors.js - color palette constants
+  - js/app.js - main entry point (placeholder)
+  - js/gallery-app.js - gallery entry point (placeholder)
+- **Learnings for future iterations:**
+  - Both HTML files use `<script type="module">` for ES6 imports
+  - Canvas container uses id="canvas-container" - TekCanvas will create canvases inside
+  - Color palette available in both CSS (variables) and JS (COLORS export)
+---
+
+## 2026-03-07 - US-002
+- What was implemented: TekCanvas dual-layer canvas system with HiDPI support
+- Files changed:
+  - js/canvas/TekCanvas.js - new file with TekCanvas class
+  - js/app.js - imports and initializes TekCanvas with test diagonal line
+- **Learnings for future iterations:**
+  - TekCanvas creates two canvases: persistent-canvas and animation-canvas (animation on top)
+  - Use getPersistentContext() for finished drawings, getAnimationContext() for previews
+  - toNormalized(x,y) converts pixel coords to 0-1, fromNormalized(x,y) converts back
+  - getWidth()/getHeight() return CSS pixel dimensions (not physical pixels)
+  - clearAnimation() clears preview layer, clearPersistent() clears finished layer
+  - HiDPI handled via setTransform() - draw in CSS pixels, canvas scales automatically
+---
+
+## 2026-03-07 - US-003
+- What was implemented: VectorRenderer class for drawing primitives with crisp lines
+- Files changed:
+  - js/canvas/VectorRenderer.js - new file with drawing methods
+  - js/app.js - updated to test all VectorRenderer primitives
+- **Learnings for future iterations:**
+  - VectorRenderer takes TekCanvas in constructor for coordinate conversion
+  - All draw methods: drawLine, drawCircle, drawRect, drawArc
+  - Coords are normalized 0-1, radius is relative to canvas width
+  - filled parameter (default false) controls stroke vs fill for shapes
+  - _crisp() method offsets by 0.5 for sharp 1px lines on pixel boundaries
+---
+
+## 2026-03-07 - US-005
+- What was implemented: Wired up PlotAnimator to app.js with test animation
+- Files changed:
+  - js/app.js - imports PlotAnimator, queues test commands for animated square with diagonals
+  - js/canvas/PlotAnimator.js - fixed naming conflict (queue method → enqueue, this.queue → this.commandQueue)
+- **Learnings for future iterations:**
+  - PlotAnimator.enqueue(command) adds to queue, animation starts automatically
+  - Command format: {type: 'line', x1, y1, x2, y2} for lines
+  - Listen for 'complete' event with addEventListener('complete', callback)
+  - Default speed is 800 px/sec, lines animate progressively
+  - Fixed bug: method named `queue()` conflicted with property `this.queue`
+---
+
+## 2026-03-07 - US-006
+- What was implemented: BaseTool abstract class for all drawing tools
+- Files changed:
+  - js/tools/BaseTool.js - new file with BaseTool class
+- **Learnings for future iterations:**
+  - BaseTool takes TekCanvas and VectorRenderer in constructor
+  - Subclasses MUST override: onMouseDown(x,y), onMouseMove(x,y), onMouseUp(x,y)
+  - Subclasses SHOULD override: onKeyDown(key) - default handles Escape to cancel
+  - Properties to set: name, icon, cursor (defaults: 'base', '?', 'crosshair')
+  - activate() sets cursor and active=true, deactivate() clears preview and resets cursor
+  - getPreviewContext() returns animation layer context for drawing previews
+  - clearPreview() clears the animation canvas layer
+  - setColor(color) sets the drawing color for the tool
+---
+
+## 2026-03-07 - US-007
+- What was implemented: ToolManager class for tool registration, switching, and undo/redo
+- Files changed:
+  - js/tools/ToolManager.js - new file with ToolManager class
+- **Learnings for future iterations:**
+  - ToolManager takes TekCanvas, VectorRenderer, and PlotAnimator in constructor
+  - registerTool(tool) - registers by tool.name
+  - setActiveTool(name) - deactivates current, activates new tool
+  - addCommand(cmd) - adds to commandHistory, clears undoStack, queues for animation
+  - undo() - pops from commandHistory, pushes to undoStack, redraws all
+  - redo() - pops from undoStack, pushes to commandHistory, redraws all
+  - getCommands() - returns copy of commandHistory for save/export
+  - loadCommands(commands, animate) - for restoring from file/localStorage
+  - _redrawAll() - clears canvas and redraws all commands instantly (for undo/redo)
+---
+
+## 2026-03-07 - US-008
+- What was implemented: LineTool for drawing lines with click-drag-release interaction
+- Files changed:
+  - js/tools/LineTool.js - new file extending BaseTool
+  - js/app.js - wired up ToolManager, LineTool, mouse events, and keyboard shortcuts
+- **Learnings for future iterations:**
+  - LineTool uses setCommandCallback(fn) to emit commands to ToolManager
+  - Mouse events on animationCanvas convert to normalized coords via toNormalized()
+  - Preview line drawn on animation layer, cleared each frame during drag
+  - Minimum movement threshold (0.001) prevents accidental single-click lines
+  - Keyboard shortcuts: use e.key.toLowerCase() for consistent Shift+key handling
+  - mouseleave also triggers onMouseUp to handle dragging outside canvas
+---
+
+## 2026-03-07 - US-009
+- What was implemented: RectTool for drawing rectangles with click-drag-release interaction
+- Files changed:
+  - js/tools/RectTool.js - new file extending BaseTool
+  - js/app.js - registered RectTool, added 'R' keyboard shortcut for tool switching
+- **Learnings for future iterations:**
+  - RectTool follows same pattern as LineTool: setCommandCallback, onMouseDown/Move/Up
+  - Rect command format: {type: 'rect', x, y, width, height, filled: false, color}
+  - Use _normalizeRect() to ensure x,y is always top-left (user can drag any direction)
+  - VectorRenderer.drawRect expects x, y, width, height in normalized 0-1 coords
+  - PlotAnimator already supports rect commands with perimeter animation
+---
+
+## 2026-03-07 - US-010
+- What was implemented: CircleTool for drawing circles with bounding box interaction
+- Files changed:
+  - js/tools/CircleTool.js - new file extending BaseTool
+  - js/app.js - registered CircleTool, added 'C' keyboard shortcut
+- **Learnings for future iterations:**
+  - CircleTool follows same pattern as RectTool: click-drag bounding box
+  - Circle inscribed: center = box center, radius = min(width, height) / 2
+  - Circle command format: {type: 'circle', cx, cy, radius, filled: false, color}
+  - PlotAnimator already supports circle commands with arc animation (circumference draws progressively)
+  - VectorRenderer.drawCircle expects radius relative to canvas width (normalized)
+---
+
+## 2026-03-07 - US-011
+- What was implemented: ArcTool for drawing arcs with multi-step interaction
+- Files changed:
+  - js/tools/ArcTool.js - new file extending BaseTool with 3-step interaction
+  - js/app.js - registered ArcTool, added 'A' keyboard shortcut
+- **Learnings for future iterations:**
+  - ArcTool uses multi-step state machine: step=0 idle, step=1 dragging radius, step=2 setting start angle, step=3 setting end angle
+  - Math.atan2(dy, dx) calculates angle from center to mouse position
+  - Preview shows guide lines from center to arc endpoints during angle selection
+  - Arc command format: {type: 'arc', cx, cy, radius, startAngle, endAngle, color}
+  - PlotAnimator already supports arc commands with progressive animation along the arc
+  - VectorRenderer.drawArc expects angles in radians
+---
+
+## 2026-03-07 - US-012
+- What was implemented: Hershey Simplex vector font data for text rendering
+- Files changed:
+  - js/fonts/hershey.js - new file with stroke-based font data
+- **Learnings for future iterations:**
+  - HERSHEY_FONT object maps characters to {width, strokes} where strokes are [[x1,y1,x2,y2], ...]
+  - Coordinates normalized with character height = 1, widths vary per character (typically 0.3-0.9)
+  - Includes A-Z, 0-9, punctuation, and many additional symbols
+  - Lowercase letters map to uppercase (same glyphs)
+  - Helper functions: getCharData(char), measureText(text, spacing), textToCommands(text, x, y, scale, spacing)
+  - textToCommands() returns array of line commands ready for PlotAnimator
+  - baseHeight is 0.03 in normalized coords, scale parameter multiplies this
+  - Unknown characters render as placeholder box
+---
+
+## 2026-03-07 - US-013
+- What was implemented: TextTool for typing text rendered as vector strokes
+- Files changed:
+  - js/tools/TextTool.js - new file extending BaseTool with text entry state machine
+  - js/canvas/PlotAnimator.js - added text command handling with stroke animation
+  - js/app.js - registered TextTool, added 'T' shortcut, fixed keyboard handling priority
+- **Learnings for future iterations:**
+  - TextTool uses isEditing state to track when user is typing vs. idle
+  - Cursor blinks at 530ms interval using setInterval
+  - When tool is active and editing, onKeyDown returns true to prevent tool switching
+  - Pass keys to active tool FIRST before checking tool shortcuts (line 128-135 in app.js)
+  - PlotAnimator text animation: convert text to line commands via textToCommands(), animate stroke-by-stroke
+  - Text command format: {type: 'text', x, y, text, scale, color}
+  - setScale(scale) method allows changing text size (for future tool options panel)
+---
+
+## 2026-03-07 - US-014
+- What was implemented: FillTool for pattern fills using flood-fill algorithm
+- Files changed:
+  - js/tools/FillTool.js - new file extending BaseTool with flood fill and pattern generation
+  - js/canvas/PlotAnimator.js - added fill command handling with line-by-line animation
+  - js/tools/ToolManager.js - added fill and text command handling in _drawCommand, imported textToCommands
+  - js/app.js - registered FillTool, added 'F' keyboard shortcut
+- **Learnings for future iterations:**
+  - FillTool uses flood fill on canvas pixel data to find connected empty regions
+  - Empty pixels detected by low brightness (<30) or low alpha (<50)
+  - Fill patterns are stored as arrays of line commands for replay/undo/redo
+  - Fill command format: {type: 'fill', x, y, pattern, color, lines: [...]}
+  - Pattern lines generated via scanline approach: find spans of filled pixels and draw lines within them
+  - Available patterns: horizontal, vertical, diagonal45, diagonal135, crosshatch, dots
+  - setPattern(pattern) allows changing fill pattern (for future tool options panel)
+  - ToolManager._drawCommand needed textToCommands import for text command handling during undo/redo
+---
+
+## 2026-03-07 - US-015
+- What was implemented: EraserTool for clicking/dragging to erase drawn elements
+- Files changed:
+  - js/tools/EraserTool.js - new file extending BaseTool with hit-testing and erase logic
+  - js/tools/ToolManager.js - added removeCommand(index) method for erasing specific commands
+  - js/app.js - registered EraserTool, added 'E' keyboard shortcut
+- **Learnings for future iterations:**
+  - EraserTool uses hit-testing with distance threshold (0.01 normalized coords)
+  - Hit-testing supports all command types: line, rect, circle, arc, text, fill
+  - For text/fill commands, convert to line strokes and hit-test each
+  - Drag-erase works by checking getCommands() on each mousemove (list updates after each removal)
+  - ToolManager.removeCommand(index) removes from history, clears undo stack, redraws canvas
+  - EraserTool uses callbacks instead of setCommandCallback: setGetCommandsCallback and setRemoveCommandCallback
+  - Hover highlighting uses COLORS.highlight from colors.js
+---
+
+## 2026-03-07 - US-016
+- What was implemented: Complete CSS styling with dark theme and all UI components
+- Files changed:
+  - css/style.css - comprehensive styling for entire app
+- **Learnings for future iterations:**
+  - CSS uses custom properties for all colors and layout dimensions (--tek-*, --toolbar-width, etc.)
+  - Layout structure: .app-container > .app-header + .app-main (contains .toolbar + .canvas-wrapper) + .status-bar
+  - Toolbar 48px wide, status bar 32px tall, header 40px tall
+  - Tool options panel (.options-panel) slides out from toolbar with .open class
+  - Button styles: .tool-btn for toolbar icons, .btn for regular buttons, .btn-primary for emphasis
+  - Form controls styled: range sliders, checkboxes with custom .checkmark, select dropdowns
+  - Gallery styles: .gallery-container, .demo-grid, .demo-card, .player-view
+  - Responsive adjustments at 900px width and 700px height breakpoints
+  - Tooltips via [data-tooltip] attribute with ::after pseudo-element
+  - Min dimensions enforced: 800x600px
+---
+
+## 2026-03-07 - US-017
+- What was implemented: Complete index.html layout with full UI structure
+- Files changed:
+  - index.html - complete layout per PRD wireframe
+- **Learnings for future iterations:**
+  - Layout: .app-container > .app-header + .app-main (contains .toolbar + .canvas-wrapper) + .status-bar
+  - Tool buttons have data-tool attribute and IDs like "tool-line", "tool-rect", etc.
+  - Undo/Redo/Save/Open/Export buttons have IDs like "btn-undo", "btn-redo", etc.
+  - Options panel has id="options-panel" with #options-title and #options-content for dynamic content
+  - Status bar: #speed-slider (range 0-4), #speed-label, #grid-toggle (checkbox), #position-display
+  - Hidden #file-input for file open dialog
+  - All SVG icons are inline with viewBox="0 0 24 24" and stroke styling from CSS
+---
+
+## 2026-03-07 - US-018
+- What was implemented: Wire up app.js with tool switching and keyboard shortcuts
+- Files changed:
+  - js/app.js - added tool button click handlers, keyboard shortcuts, active tool highlighting
+  - css/style.css - added pointer-events handling for options panel
+- **Learnings for future iterations:**
+  - Tool buttons use data-tool attribute to identify which tool to switch to
+  - switchTool() helper function handles both ToolManager.setActiveTool() and UI button highlighting
+  - Keyboard shortcuts: L=Line, R=Rect, C=Circle, A=Arc, T=Text, F=Fill, E=Eraser
+  - Ctrl+Z/Ctrl+Shift+Z for undo/redo (check both e.ctrlKey and e.shiftKey)
+  - G toggles grid checkbox by setting .checked and dispatching 'change' event
+  - Space pauses/resumes animation via animator.pause()/resume() with isPaused check
+  - Options panel needs pointer-events: none when closed to avoid blocking canvas clicks
+---
+
+## 2026-03-07 - US-019
+- What was implemented: Tool options panels with per-tool settings
+- Files changed:
+  - js/app.js - showOptionsPanel() dynamically creates options UI, localStorage persistence
+  - js/tools/LineTool.js - added setLineStyle()/getLineStyle() for solid/dashed/dotted
+  - js/tools/RectTool.js - added setFilled()/getFilled() for filled toggle
+  - js/tools/CircleTool.js - added setFilled()/getFilled() for filled toggle
+  - js/canvas/VectorRenderer.js - drawLine() supports style parameter for dashed/dotted lines
+  - js/canvas/PlotAnimator.js - passes line style to renderer during animation
+  - js/tools/ToolManager.js - passes line style in _drawCommand for undo/redo
+- **Learnings for future iterations:**
+  - Tool options stored in localStorage via loadToolOptions()/saveToolOption() functions
+  - showOptionsPanel() creates controls dynamically based on active tool name
+  - Tools without options (arc, eraser) close the panel by removing .open class
+  - createSelect() and createCheckbox() helper functions for building form controls
+  - VectorRenderer uses ctx.setLineDash([8,4]) for dashed, [2,4] for dotted lines
+  - TextTool uses .scale property directly (public), FillTool uses getPattern()/setPattern()
+---
+
+## 2026-03-07 - US-020
+- What was implemented: Grid toggle and position display
+- Files changed:
+  - js/canvas/TekCanvas.js - added drawGrid() method with 50px spacing, GRID_COLOR at GRID_OPACITY
+  - js/tools/ToolManager.js - added setOnBeforeDraw() callback for grid redraw on undo/redo
+  - js/app.js - wired up grid toggle with localStorage, position display on mousemove
+- **Learnings for future iterations:**
+  - Grid uses GRID_COLOR and GRID_OPACITY from colors.js (already defined)
+  - ToolManager.setOnBeforeDraw() callback is called after clearPersistent() but before drawing commands
+  - Grid state stored in localStorage with key 'tektronix-grid-enabled'
+  - Position display shows rounded pixel coordinates, clears to 'X: --- Y: ---' on mouseleave
+  - When clearing/redrawing canvas, grid must be redrawn first (via onBeforeDraw callback)
+---
+
+## 2026-03-07 - US-021
+- What was implemented: Speed slider control with 5 stops and localStorage persistence
+- Files changed:
+  - js/app.js - added speed slider wiring with SPEED_VALUES, SPEED_LABELS, updateSpeed(), localStorage save/load
+- **Learnings for future iterations:**
+  - Speed slider uses indices 0-4 mapped to values [100, 300, 800, 2000, Infinity]
+  - Speed labels: ['Slowest', 'Slow', 'Normal', 'Fast', 'Instant']
+  - PlotAnimator.setSpeed(pxPerSec) updates animation speed in real-time
+  - Speed state stored in localStorage with key 'tektronix-speed'
+  - Use 'input' event (not 'change') on slider for real-time updates during drag
+---
+
+## 2026-03-07 - US-022
+- What was implemented: localStorage auto-save with debounced save and auto-load
+- Files changed:
+  - js/utils/storage.js - new file with saveToLocalStorage, loadFromLocalStorage, clearLocalStorage, createAutoSave
+  - js/app.js - integrated auto-save on all command changes, auto-load on page init, clearCanvas function
+- **Learnings for future iterations:**
+  - Storage key is 'tektronix-drawing' for the command array
+  - createAutoSave(getCommands, delay) returns a debounced trigger function
+  - Auto-save triggers on: new commands from all tools, eraser removal, undo/redo
+  - Auto-load happens after grid setup so grid callback is already registered
+  - clearCanvas() exposed on window for debugging and future clear button
+  - ToolManager.loadCommands(commands, false) loads instantly without animation
+---
+
+## 2026-03-07 - US-023
+- What was implemented: File save/load for .tek.json format with toast notifications
+- Files changed:
+  - js/utils/storage.js - added saveToFile() and loadFromFile() functions with validateTekFile()
+  - js/app.js - wired up Save/Open buttons, added Ctrl+S/Ctrl+O shortcuts, added showToast() function
+  - css/style.css - added toast notification styles (.toast, .toast.show, .toast.error, .toast.success)
+- **Learnings for future iterations:**
+  - File format: {version: 1, created, modified, canvasAspect, commands: [...]}
+  - saveToFile() creates blob URL and triggers download via temporary anchor element
+  - loadFromFile() uses Promise to handle async file reading, returns {success, commands, error}
+  - Toast notification uses transform + opacity transition for smooth slide-up animation
+  - Hidden file input (#file-input) already exists in index.html with accept=".tek.json,.json"
+  - Remember to URL.revokeObjectURL() after download to prevent memory leaks
+---
+
+## 2026-03-08 - US-024
+- What was implemented: PNG export with scale and background options
+- Files changed:
+  - js/utils/export.js - new file with exportPNG() function
+  - index.html - added export modal with PNG/SVG buttons and options
+  - css/style.css - added modal overlay and export modal styles
+  - js/app.js - wired up export button, modal handlers, Ctrl+E shortcut
+- **Learnings for future iterations:**
+  - exportPNG(tekCanvas, {scale, transparent}) takes TekCanvas instance and options
+  - Uses tekCanvas.persistentCanvas directly for source (physical pixel dimensions)
+  - Scales from source canvas (CSS size * dpr) to export size (CSS size * scale)
+  - Filename format: tektronix-{ISO timestamp with dashes}.png
+  - Modal uses .open class for visibility, closes on overlay click or Escape key
+  - SVG button disabled until US-025 is implemented
+---
+
+## 2026-03-08 - US-025
+- What was implemented: SVG export for vector graphics output
+- Files changed:
+  - js/utils/export.js - added exportSVG() function and commandToSVG() helper
+  - js/app.js - imported exportSVG, wired up SVG button click handler
+  - index.html - enabled SVG export button (removed disabled attribute)
+- **Learnings for future iterations:**
+  - exportSVG(commands, width, height, {transparent}) converts commands to SVG elements
+  - SVG uses viewBox matching canvas dimensions for proper aspect ratio
+  - Inline CSS with .tek-primary and .tek-background classes
+  - Command types map to SVG: line→<line>, rect→<rect>, circle→<circle>, arc→<path d="M...A...">, text→multiple <line> elements via textToCommands
+  - Filled shapes use fill attribute, strokes use stroke attribute
+  - Line styles (dashed, dotted) map to stroke-dasharray
+  - Arc uses SVG path arc command: A rx ry rotation large-arc-flag sweep-flag x y
+  - Text is converted to line strokes using the hershey.js textToCommands function
+  - Fill patterns are stored as .lines array on fill commands
+---
+
+## 2026-03-08 - US-026
+- What was implemented: Geometric gallery demos with four mathematical curve generators
+- Files changed:
+  - js/gallery/graphics/geometric.js - new file with spirograph, lissajous, roseCurve, fibonacciSpiral generators
+  - js/gallery-app.js - added import and test of geometric demos
+- **Learnings for future iterations:**
+  - Gallery demos use generator functions (*generate) that yield line commands
+  - Demo format: {id, name, category, description, thumbnail, params, *generate(params)}
+  - Each param has: {default, min, max, step, label}
+  - Generators yield {type: 'line', x1, y1, x2, y2} commands for curves
+  - Spirograph uses hypotrochoid equations: x = (R-r)*cos(t) + d*cos((R-r)/r*t)
+  - Lissajous: x = A*sin(a*t+delta), y = A*sin(b*t)
+  - Rose curve: r = cos(n/d * theta) in polar coords
+  - Fibonacci spiral: quarter-circle arcs based on Fibonacci sequence with optional squares
+  - geometricDemos array exported as default for easy import by GalleryManager
+---
+
+## 2026-03-08 - US-027
+- What was implemented: 3D wireframe gallery demos with perspective projection
+- Files changed:
+  - js/gallery/graphics/threed.js - new file with 4 wireframe demos
+  - js/gallery-app.js - added import and test for threedDemos
+- **Learnings for future iterations:**
+  - 3D demos follow same pattern as geometric: {id, name, category, description, thumbnail, params, *generate(params)}
+  - 3D projection uses perspective formula: scale = fov / (distance + z), then x' = 0.5 + x*scale
+  - Rotation uses standard rotation matrices: rotateX, rotateY, rotateZ functions
+  - Sphere uses latitude (phi) and longitude (theta) parametric equations
+  - Torus uses (R + r*cos(phi))*cos(theta) for x, r*sin(phi) for y
+  - All 3D demos output line commands only - no special 3D command types needed
+  - Category is '3d' for 3D demos (matches PRD gallery categories)
+  - Added pyramid as bonus demo using same edge-vertex pattern as cube
+---
+
+## 2026-03-08 - US-028
+- What was implemented: Data visualization gallery demos with four chart types
+- Files changed:
+  - js/gallery/graphics/data.js - new file with 4 data visualization demos
+  - js/gallery-app.js - added import and test for dataDemos
+- **Learnings for future iterations:**
+  - Data demos follow same pattern: {id, name, category, description, thumbnail, params, *generate(params)}
+  - Category is 'data' for data visualization demos
+  - Bar chart: draws bars as filled rectangles using horizontal fill lines for texture
+  - Line graph: uses diamond shapes for data points, dashed trend line at end
+  - Pie chart: draws segments with radial lines + arc segments, includes label lines
+  - Scatter plot: supports 3 point styles (X, +, O), calculates linear regression for trend line
+  - Grid lines are drawn as dashed segments (alternating line segments)
+  - Sample data embedded directly in the module as constants (SAMPLE_BAR_DATA, etc.)
+  - All charts use normalized 0-1 coordinates with margins for axes (left=0.1-0.12, right=0.92, etc.)
+---
+
+## 2026-03-08 - US-029
+- What was implemented: Maps and astronomy gallery demos with four visualization types
+- Files changed:
+  - js/gallery/graphics/maps.js - new file with 4 maps/astronomy demos
+  - js/gallery-app.js - added import and test for mapsDemos
+- **Learnings for future iterations:**
+  - Maps demos follow same pattern: {id, name, category, description, thumbnail, params, *generate(params)}
+  - Category is 'maps' for geography and astronomy demos
+  - World map: simplified continent outlines stored as coordinate arrays in WORLD_CONTINENTS object
+  - USA map: continental outline + internal state-like divisions + city markers, includes Alaska/Hawaii hints
+  - Earth globe: reuses 3D projection math (rotateX3D, rotateY3D, project3D functions), lat/lon grid + continent hints
+  - Solar system: orbital diagram with sun, planets, Saturn's rings, and asteroid belt hints
+  - For 3D globe, only draw front-facing elements (check point.z < threshold after rotation)
+  - Coordinate data can be highly simplified/stylized - PRD allows artistic interpretation
+  - mapsDemos array exported as default for GalleryManager integration
+---
+
+## 2026-03-08 - US-030
+- What was implemented: Technical gallery demos with four engineering/technical visualizations
+- Files changed:
+  - js/gallery/graphics/technical.js - new file with 4 technical demos
+  - js/gallery-app.js - added import and test for technicalDemos
+- **Learnings for future iterations:**
+  - Technical demos follow same pattern: {id, name, category, description, thumbnail, params, *generate(params)}
+  - Category is 'technical' for engineering/technical demos
+  - Circuit schematic: uses helper functions drawAndGate, drawOrGate, drawNotGate, drawNandGate for reusable gate symbols
+  - Oscilloscope: draws waveforms (sine, square, sawtooth) with configurable frequency and amplitude, includes grid and decorative knobs
+  - Logic gates: reference diagram showing AND, OR, NOT, NAND, NOR, XOR, Buffer, XNOR, and Tri-state symbols with input/output connections
+  - Block diagram: system architecture style with boxes, arrows, and varying complexity levels (simple to full)
+  - Arrow drawing uses Math.atan2 for direction calculation with configurable arrowhead angles
+  - technicalDemos array exported as default for GalleryManager integration
+---
+
+## 2026-03-08 - US-031
+- What was implemented: GalleryManager class for loading and managing gallery demos
+- Files changed:
+  - js/gallery/GalleryManager.js - new file with GalleryManager class
+  - js/gallery-app.js - updated to use GalleryManager with test output
+- **Learnings for future iterations:**
+  - GalleryManager imports all demo modules (geometric, threed, data, maps, technical)
+  - Demo arrays exported as named exports (geometricDemos, threedDemos, etc.) and default exports
+  - CATEGORY_INFO object defines display names and sort order for categories
+  - getAllDemos() returns copy of internal demos array
+  - getCategories() returns array of {id, name} objects sorted by predefined order
+  - getDemosByCategory(cat) filters demos by category string
+  - getDemoById(id) uses Map for O(1) lookup
+  - generateThumbnail(demo, options) creates offscreen canvas, draws commands directly without animation
+  - generateThumbnailDataURL() convenience method returns PNG data URL
+  - Thumbnail rendering uses simple coordinate conversion (normalized 0-1 to pixels)
+  - Text commands are skipped in thumbnails since they need hershey font
+  - Fill commands use pre-computed .lines array stored on the command
+  - Additional helper methods: getDemoCount(), getCategoryCount(category)
+---
+
+## 2026-03-08 - US-032
+- What was implemented: GraphicPlayer class for demo playback with full animation controls
+- Files changed:
+  - js/gallery/GraphicPlayer.js - new file with GraphicPlayer class
+  - js/gallery-app.js - added GraphicPlayer import and test code
+- **Learnings for future iterations:**
+  - GraphicPlayer takes demo object and container element in constructor
+  - Internally creates TekCanvas, VectorRenderer, and PlotAnimator for rendering
+  - play() starts or resumes playback, pause() pauses, restart() clears and regenerates
+  - setSpeed(pxPerSec) updates PlotAnimator speed in real-time
+  - setParam(name, value) and setParams(params) update demo parameters and auto-restart
+  - getParams(), getParamDefinitions() for accessing parameter info
+  - Extends EventTarget and emits 'complete' event (forwarded from PlotAnimator)
+  - loadDemo(demo) allows switching to a different demo
+  - getTekCanvas(), getAnimator() expose internal components if needed
+  - destroy() cleans up resources (calls tekCanvas.destroy())
+---
+
+## 2026-03-08 - US-033
+- What was implemented: Gallery page HTML and CSS with full layout structure
+- Files changed:
+  - gallery.html - complete layout with header, category tabs, demo grid, player view, and controls
+  - css/style.css - added gallery-specific CSS (gallery-main, player-active, param-value, loading/empty states)
+  - js/gallery-app.js - updated to work with new HTML structure (uses player-canvas-container)
+- **Learnings for future iterations:**
+  - Gallery layout uses .gallery-container > .gallery-header + .category-tabs + .gallery-main
+  - .gallery-main contains both .demo-grid and .player-view, toggled via .player-active class
+  - Category tabs use data-category attribute for filtering
+  - Demo cards have data-demo-id attribute for identifying which demo to play
+  - Player view has: #player-title (h2), #player-canvas-container (for TekCanvas), #param-sliders (dynamic)
+  - Player controls: #restart-btn, #play-pause-btn, #player-speed (slider), #player-speed-label
+  - #open-in-editor-btn for future "Open in Editor" feature (US-035)
+  - #back-btn returns to grid view (removes .player-active from .gallery-main)
+---
+
+## 2026-03-08 - US-034
+- What was implemented: Gallery app.js wiring with full functionality
+- Files changed:
+  - js/gallery-app.js - complete rewrite with thumbnail grid, category filtering, player controls, URL-based direct linking
+- **Learnings for future iterations:**
+  - clearElement() helper function removes children safely instead of innerHTML = ''
+  - GalleryManager.generateThumbnail() returns canvas element, append directly to card
+  - GraphicPlayer.setParam() auto-restarts the demo with new parameters
+  - URL hash format: #demo={demoId} for direct linking (e.g., #demo=spirograph)
+  - Use history.pushState for URL updates, history.replaceState for clearing invalid hashes
+  - hashchange event listener handles browser back/forward navigation
+  - Speed slider uses indices 0-4 mapped to SPEED_VALUES [100, 300, 800, 2000, Infinity]
+---
+
+## 2026-03-08 - US-035
+- What was implemented: Open in Editor feature to transfer gallery demos to the drawing canvas
+- Files changed:
+  - js/gallery-app.js - updated setupOpenInEditor() to generate commands and store in sessionStorage
+  - js/app.js - added sessionStorage check on load to receive gallery transfer commands
+- **Learnings for future iterations:**
+  - sessionStorage key 'tektronix-gallery-transfer' used for gallery-to-editor transfer
+  - demo.generate(params) is a generator that yields line commands, iterate to collect all
+  - sessionStorage transfer takes priority over localStorage auto-save on page load
+  - Clear sessionStorage after loading to prevent re-loading on subsequent visits
+  - After loading from gallery, trigger auto-save so commands persist in localStorage
+---
+
+## 2026-03-08 - US-036
+- What was implemented: Docker deployment configuration with nginx
+- Files changed:
+  - Dockerfile - nginx:alpine based image, copies static files (html, css, js) to /usr/share/nginx/html
+  - docker-compose.yml - web service with port mapping 8080:80
+- **Learnings for future iterations:**
+  - nginx:alpine is lightweight (~20MB) and serves static files efficiently
+  - docker-compose.yml no longer needs `version` attribute (obsolete since compose v2)
+  - Static files are: index.html, gallery.html, css/, js/ directories
+  - Site accessible at http://localhost:8080 after `docker-compose up`
+---
+
+## 2026-03-08 - US-037
+- What was implemented: README documentation with setup, usage, and license
+- Files changed:
+  - README.md - new file with comprehensive project documentation
+- **Learnings for future iterations:**
+  - README includes: project description, quick start (Docker), development instructions, keyboard shortcuts, file format docs, MIT license
+  - File format (.tek.json) uses normalized 0-1 coordinates for resolution independence
+  - Keyboard shortcuts are tool keys (L/R/C/A/T/F/E) plus action keys (Ctrl+Z/S/O/E, G, Space)
+  - Screenshot placeholder included - replace with actual screenshot when available
+---
+
+## 2026-03-08 - US-038
+- What was implemented: Final polish and cleanup verification pass
+- Files changed:
+  - prd.json - marked US-038 as passes: true
+  - progress.txt - added this progress entry
+- **Verification completed:**
+  - No console.log debug statements found in codebase
+  - Keyboard shortcuts verified working (tested R for rect, G for grid toggle)
+  - localStorage persistence working (grid state persisted across page loads)
+  - Gallery demos play correctly (tested Spirograph, all 20 demos visible)
+  - Responsive layout verified at 800x600 minimum size
+  - Favicon.svg already exists in assets/ directory
+  - Docker deployment verified: builds, starts, serves site with no errors
+- **Learnings for future iterations:**
+  - Use Playwright browser testing to verify UI functionality programmatically
+  - Check `docker compose logs` to verify no container errors
+  - Browser console should show 0 errors for production readiness
+  - Grid state and speed settings persist via localStorage keys 'tektronix-grid-enabled' and 'tektronix-speed'
 ---

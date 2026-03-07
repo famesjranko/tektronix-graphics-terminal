@@ -16,8 +16,8 @@
         "Both HTML files load style.css and have dark background"
       ],
       "priority": 1,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-07"
     },
     {
       "id": "US-002",
@@ -33,8 +33,8 @@
         "index.html imports and initializes TekCanvas"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-07"
     },
     {
       "id": "US-003",
@@ -48,8 +48,8 @@
         "Default color is --tek-primary (#00FF88)"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-07"
     },
     {
       "id": "US-004",
@@ -66,8 +66,8 @@
         "Emits 'complete' event when queue empties"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-07"
     },
     {
       "id": "US-005",
@@ -81,8 +81,8 @@
         "Console logs 'Animation complete' when done"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-07"
     },
     {
       "id": "US-006",
@@ -96,8 +96,8 @@
         "Handles preview rendering on animation canvas"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-07"
     },
     {
       "id": "US-007",
@@ -113,8 +113,8 @@
         "getCommands() - returns all commands (for save/export)"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-07"
     },
     {
       "id": "US-008",
@@ -129,8 +129,8 @@
         "Test: can draw lines in browser"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-07"
     },
     {
       "id": "US-009",
@@ -145,8 +145,8 @@
         "Test: can draw rectangles in browser"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-07"
     },
     {
       "id": "US-010",
@@ -162,8 +162,8 @@
         "Test: can draw circles in browser"
       ],
       "priority": 10,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-07"
     },
     {
       "id": "US-011",
@@ -179,8 +179,8 @@
         "Register with ToolManager"
       ],
       "priority": 11,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-07"
     },
     {
       "id": "US-012",
@@ -195,8 +195,8 @@
         "Based on Hershey Simplex (public domain)"
       ],
       "priority": 12,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-07"
     },
     {
       "id": "US-013",
@@ -212,8 +212,8 @@
         "Default scale: 1 (about 20px tall)"
       ],
       "priority": 13,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-07"
     },
     {
       "id": "US-014",
@@ -228,8 +228,8 @@
         "Pattern rendered as lines within boundary"
       ],
       "priority": 14,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-07"
     },
     {
       "id": "US-015",
@@ -244,8 +244,8 @@
         "Drag erases multiple elements touched"
       ],
       "priority": 15,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-07"
     },
     {
       "id": "US-016",
@@ -261,8 +261,8 @@
         "Responsive: works at 800x600 minimum"
       ],
       "priority": 16,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-07"
     },
     {
       "id": "US-017",
@@ -278,8 +278,8 @@
         "Status bar with speed slider, grid toggle, position display"
       ],
       "priority": 17,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-07"
     },
     {
       "id": "US-018",
@@ -295,8 +295,8 @@
         "Active tool button highlighted"
       ],
       "priority": 18,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-07"
     },
     {
       "id": "US-019",
@@ -312,8 +312,8 @@
         "Panel slides in/out smoothly"
       ],
       "priority": 19,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-07"
     },
     {
       "id": "US-020",
@@ -328,8 +328,8 @@
         "Updates on mousemove over canvas"
       ],
       "priority": 20,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-07"
     },
     {
       "id": "US-021",
@@ -344,8 +344,8 @@
         "Default: Normal (800 px/sec)"
       ],
       "priority": 21,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-07"
     },
     {
       "id": "US-022",
@@ -360,8 +360,8 @@
         "Clear storage when user explicitly clears canvas"
       ],
       "priority": 22,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-07"
     },
     {
       "id": "US-023",
@@ -376,8 +376,8 @@
         "Shows error toast if file invalid"
       ],
       "priority": 23,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-07"
     },
     {
       "id": "US-024",
@@ -392,8 +392,8 @@
         "Works correctly with HiDPI canvas"
       ],
       "priority": 24,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-08"
     },
     {
       "id": "US-025",
@@ -409,8 +409,8 @@
         "Opens correctly in browser and Inkscape"
       ],
       "priority": 25,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-08"
     },
     {
       "id": "US-026",
@@ -426,8 +426,8 @@
         "Export array of demo objects with id, name, category, params, generate()"
       ],
       "priority": 26,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-08"
     },
     {
       "id": "US-027",
@@ -443,8 +443,8 @@
         "Export array of demo objects"
       ],
       "priority": 27,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-08"
     },
     {
       "id": "US-028",
@@ -460,8 +460,8 @@
         "Export array of demo objects"
       ],
       "priority": 28,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-08"
     },
     {
       "id": "US-029",
@@ -477,8 +477,8 @@
         "Export array of demo objects"
       ],
       "priority": 29,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-08"
     },
     {
       "id": "US-030",
@@ -493,8 +493,8 @@
         "Export array of demo objects"
       ],
       "priority": 30,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-08"
     },
     {
       "id": "US-031",
@@ -510,8 +510,8 @@
         "generateThumbnail(demo) - renders small preview to canvas"
       ],
       "priority": 31,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-08"
     },
     {
       "id": "US-032",
@@ -527,8 +527,8 @@
         "Emits 'complete' event when done"
       ],
       "priority": 32,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-08"
     },
     {
       "id": "US-033",
@@ -544,8 +544,8 @@
         "Back button to return to grid"
       ],
       "priority": 33,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-08"
     },
     {
       "id": "US-034",
@@ -561,8 +561,8 @@
         "URL updates with demo ID (allows direct linking)"
       ],
       "priority": 34,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-08"
     },
     {
       "id": "US-035",
@@ -577,8 +577,8 @@
         "User can edit/extend the demo drawing"
       ],
       "priority": 35,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-08"
     },
     {
       "id": "US-036",
@@ -593,8 +593,8 @@
         "Site accessible at http://localhost:8080"
       ],
       "priority": 36,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-08"
     },
     {
       "id": "US-037",
@@ -610,8 +610,8 @@
         "License (MIT)"
       ],
       "priority": 37,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-08"
     },
     {
       "id": "US-038",
@@ -627,8 +627,8 @@
         "Verify Docker deployment works end-to-end"
       ],
       "priority": 38,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-08"
     }
   ]
 }
