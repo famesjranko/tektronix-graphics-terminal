@@ -5,6 +5,7 @@ Project: Tektronix Graphics Terminal
 ## Codebase Patterns
 - Use ES6 modules with `<script type="module">` in HTML
 - Import colors from `./utils/colors.js` - exports COLORS object and DEFAULT_COLOR
+- EraserTool uses different callbacks than drawing tools: setGetCommandsCallback and setRemoveCommandCallback
 - CSS variables match JS constants: --tek-primary = COLORS.primary
 - TekCanvas: getPersistentContext() for final drawings, getAnimationContext() for previews
 - Coordinates: toNormalized(x,y) and fromNormalized(x,y) convert between pixels and 0-1 range
@@ -208,4 +209,20 @@ Project: Tektronix Graphics Terminal
   - Available patterns: horizontal, vertical, diagonal45, diagonal135, crosshatch, dots
   - setPattern(pattern) allows changing fill pattern (for future tool options panel)
   - ToolManager._drawCommand needed textToCommands import for text command handling during undo/redo
+---
+
+## 2026-03-07 - US-015
+- What was implemented: EraserTool for clicking/dragging to erase drawn elements
+- Files changed:
+  - js/tools/EraserTool.js - new file extending BaseTool with hit-testing and erase logic
+  - js/tools/ToolManager.js - added removeCommand(index) method for erasing specific commands
+  - js/app.js - registered EraserTool, added 'E' keyboard shortcut
+- **Learnings for future iterations:**
+  - EraserTool uses hit-testing with distance threshold (0.01 normalized coords)
+  - Hit-testing supports all command types: line, rect, circle, arc, text, fill
+  - For text/fill commands, convert to line strokes and hit-test each
+  - Drag-erase works by checking getCommands() on each mousemove (list updates after each removal)
+  - ToolManager.removeCommand(index) removes from history, clears undo stack, redraws canvas
+  - EraserTool uses callbacks instead of setCommandCallback: setGetCommandsCallback and setRemoveCommandCallback
+  - Hover highlighting uses COLORS.highlight from colors.js
 ---

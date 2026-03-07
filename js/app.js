@@ -14,6 +14,7 @@ import { CircleTool } from './tools/CircleTool.js';
 import { ArcTool } from './tools/ArcTool.js';
 import { TextTool } from './tools/TextTool.js';
 import { FillTool } from './tools/FillTool.js';
+import { EraserTool } from './tools/EraserTool.js';
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
@@ -79,6 +80,11 @@ document.addEventListener('DOMContentLoaded', () => {
     toolManager.addCommand(cmd);
   });
   toolManager.registerTool(fillTool);
+
+  const eraserTool = new EraserTool(tekCanvas, renderer);
+  eraserTool.setGetCommandsCallback(() => toolManager.getCommands());
+  eraserTool.setRemoveCommandCallback((index) => toolManager.removeCommand(index));
+  toolManager.registerTool(eraserTool);
 
   // Set line tool as default active tool
   toolManager.setActiveTool('line');
@@ -181,7 +187,11 @@ document.addEventListener('DOMContentLoaded', () => {
       toolManager.setActiveTool('fill');
       return;
     }
+    if (key === 'e') {
+      toolManager.setActiveTool('eraser');
+      return;
+    }
   });
 
-  console.log('Tools registered: LineTool (L), RectTool (R), CircleTool (C), ArcTool (A), TextTool (T), FillTool (F) - ready for drawing');
+  console.log('Tools registered: LineTool (L), RectTool (R), CircleTool (C), ArcTool (A), TextTool (T), FillTool (F), EraserTool (E) - ready for drawing');
 });

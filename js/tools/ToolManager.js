@@ -231,6 +231,26 @@ export class ToolManager {
   }
 
   /**
+   * Remove a command at specific index (for eraser tool)
+   * @param {number} index - Index of command to remove
+   * @returns {boolean} - True if command was removed
+   */
+  removeCommand(index) {
+    if (index < 0 || index >= this.commandHistory.length) {
+      return false;
+    }
+
+    // Remove command at index
+    this.commandHistory.splice(index, 1);
+    // Clear undo stack when command is removed
+    this.undoStack = [];
+
+    // Redraw canvas
+    this._redrawAll();
+    return true;
+  }
+
+  /**
    * Check if undo is available
    * @returns {boolean}
    */
