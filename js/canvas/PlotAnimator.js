@@ -258,6 +258,17 @@ export class PlotAnimator extends EventTarget {
         }
         return totalLength || 100;
       }
+      case 'fill': {
+        // Sum of all pattern lines
+        const lines = command.lines || [];
+        let totalLength = 0;
+        for (const line of lines) {
+          const dx = (line.x2 - line.x1) * width;
+          const dy = (line.y2 - line.y1) * height;
+          totalLength += Math.sqrt(dx * dx + dy * dy);
+        }
+        return totalLength || 100;
+      }
       default:
         // Default to some reasonable length
         return 100;
@@ -288,6 +299,9 @@ export class PlotAnimator extends EventTarget {
         break;
       case 'text':
         this._drawTextProgress(ctx, command, progress, color);
+        break;
+      case 'fill':
+        this._drawFillProgress(ctx, command, progress, color);
         break;
       default:
         // Unknown command type - just complete it
@@ -401,6 +415,51 @@ export class PlotAnimator extends EventTarget {
   }
 
   /**
+   * Draw fill pattern with progress (line by line)
+   */
+  _drawFillProgress(ctx, command, progress, color) {
+    const lines = command.lines || [];
+    if (lines.length === 0) return;
+
+    // Calculate total length for proportional progress
+    const width = this.tekCanvas.getWidth();
+    const height = this.tekCanvas.getHeight();
+    let totalLength = 0;
+    const lengths = [];
+
+    for (const line of lines) {
+      const dx = (line.x2 - line.x1) * width;
+      const dy = (line.y2 - line.y1) * height;
+      const len = Math.sqrt(dx * dx + dy * dy);
+      lengths.push(len);
+      totalLength += len;
+    }
+
+    // Draw lines up to progress
+    let drawnLength = 0;
+    const targetLength = progress * totalLength;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const len = lengths[i];
+
+      if (drawnLength + len <= targetLength) {
+        // Draw complete line
+        this.renderer.drawLine(ctx, line.x1, line.y1, line.x2, line.y2, color);
+        drawnLength += len;
+      } else {
+        // Draw partial line
+        const remaining = targetLength - drawnLength;
+        const t = remaining / len;
+        const x2 = line.x1 + (line.x2 - line.x1) * t;
+        const y2 = line.y1 + (line.y2 - line.y1) * t;
+        this.renderer.drawLine(ctx, line.x1, line.y1, x2, y2, color);
+        break;
+      }
+    }
+  }
+
+  /**
    * Complete a command (draw to persistent layer)
    * @param {Object} command
    */
@@ -425,6 +484,13 @@ export class PlotAnimator extends EventTarget {
         const lineCommands = textToCommands(command.text, command.x, command.y, command.scale || 1);
         for (const lineCmd of lineCommands) {
           this.renderer.drawLine(ctx, lineCmd.x1, lineCmd.y1, lineCmd.x2, lineCmd.y2, color);
+        }
+        break;
+      }
+      case 'fill': {
+        const lines = command.lines || [];
+        for (const line of lines) {
+          this.renderer.drawLine(ctx, line.x1, line.y1, line.x2, line.y2, color);
         }
         break;
       }

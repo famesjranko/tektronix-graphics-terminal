@@ -6,6 +6,7 @@
  */
 
 import { DEFAULT_COLOR } from '../utils/colors.js';
+import { textToCommands } from '../fonts/hershey.js';
 
 export class ToolManager {
   /**
@@ -212,7 +213,20 @@ export class ToolManager {
       case 'arc':
         this.renderer.drawArc(ctx, cmd.cx, cmd.cy, cmd.radius, cmd.startAngle, cmd.endAngle, color);
         break;
-      // Future command types can be added here
+      case 'text': {
+        const lineCommands = textToCommands(cmd.text, cmd.x, cmd.y, cmd.scale || 1);
+        for (const lineCmd of lineCommands) {
+          this.renderer.drawLine(ctx, lineCmd.x1, lineCmd.y1, lineCmd.x2, lineCmd.y2, color);
+        }
+        break;
+      }
+      case 'fill': {
+        const lines = cmd.lines || [];
+        for (const line of lines) {
+          this.renderer.drawLine(ctx, line.x1, line.y1, line.x2, line.y2, color);
+        }
+        break;
+      }
     }
   }
 

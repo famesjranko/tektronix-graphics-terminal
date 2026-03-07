@@ -13,6 +13,7 @@ import { RectTool } from './tools/RectTool.js';
 import { CircleTool } from './tools/CircleTool.js';
 import { ArcTool } from './tools/ArcTool.js';
 import { TextTool } from './tools/TextTool.js';
+import { FillTool } from './tools/FillTool.js';
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
@@ -72,6 +73,12 @@ document.addEventListener('DOMContentLoaded', () => {
     toolManager.addCommand(cmd);
   });
   toolManager.registerTool(textTool);
+
+  const fillTool = new FillTool(tekCanvas, renderer);
+  fillTool.setCommandCallback((cmd) => {
+    toolManager.addCommand(cmd);
+  });
+  toolManager.registerTool(fillTool);
 
   // Set line tool as default active tool
   toolManager.setActiveTool('line');
@@ -170,7 +177,11 @@ document.addEventListener('DOMContentLoaded', () => {
       toolManager.setActiveTool('text');
       return;
     }
+    if (key === 'f') {
+      toolManager.setActiveTool('fill');
+      return;
+    }
   });
 
-  console.log('Tools registered: LineTool (L), RectTool (R), CircleTool (C), ArcTool (A), TextTool (T) - ready for drawing');
+  console.log('Tools registered: LineTool (L), RectTool (R), CircleTool (C), ArcTool (A), TextTool (T), FillTool (F) - ready for drawing');
 });
