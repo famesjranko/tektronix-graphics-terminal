@@ -15,6 +15,7 @@ import { ArcTool } from './tools/ArcTool.js';
 import { TextTool } from './tools/TextTool.js';
 import { FillTool } from './tools/FillTool.js';
 import { EraserTool } from './tools/EraserTool.js';
+import { loadFromLocalStorage, clearLocalStorage, createAutoSave } from './utils/storage.js';
 
 // Storage keys
 const TOOL_OPTIONS_KEY = 'tektronix-tool-options';
@@ -62,6 +63,9 @@ document.addEventListener('DOMContentLoaded', () => {
   window.animator = animator;
   window.toolManager = toolManager;
 
+  // Create auto-save function (debounced 1sec)
+  const triggerAutoSave = createAutoSave(() => toolManager.getCommands(), 1000);
+
   console.log('TekCanvas initialized:', {
     width: tekCanvas.getWidth(),
     height: tekCanvas.getHeight(),
@@ -77,42 +81,51 @@ document.addEventListener('DOMContentLoaded', () => {
   const lineTool = new LineTool(tekCanvas, renderer);
   lineTool.setCommandCallback((cmd) => {
     toolManager.addCommand(cmd);
+    triggerAutoSave();
   });
   toolManager.registerTool(lineTool);
 
   const rectTool = new RectTool(tekCanvas, renderer);
   rectTool.setCommandCallback((cmd) => {
     toolManager.addCommand(cmd);
+    triggerAutoSave();
   });
   toolManager.registerTool(rectTool);
 
   const circleTool = new CircleTool(tekCanvas, renderer);
   circleTool.setCommandCallback((cmd) => {
     toolManager.addCommand(cmd);
+    triggerAutoSave();
   });
   toolManager.registerTool(circleTool);
 
   const arcTool = new ArcTool(tekCanvas, renderer);
   arcTool.setCommandCallback((cmd) => {
     toolManager.addCommand(cmd);
+    triggerAutoSave();
   });
   toolManager.registerTool(arcTool);
 
   const textTool = new TextTool(tekCanvas, renderer);
   textTool.setCommandCallback((cmd) => {
     toolManager.addCommand(cmd);
+    triggerAutoSave();
   });
   toolManager.registerTool(textTool);
 
   const fillTool = new FillTool(tekCanvas, renderer);
   fillTool.setCommandCallback((cmd) => {
     toolManager.addCommand(cmd);
+    triggerAutoSave();
   });
   toolManager.registerTool(fillTool);
 
   const eraserTool = new EraserTool(tekCanvas, renderer);
   eraserTool.setGetCommandsCallback(() => toolManager.getCommands());
-  eraserTool.setRemoveCommandCallback((index) => toolManager.removeCommand(index));
+  eraserTool.setRemoveCommandCallback((index) => {
+    toolManager.removeCommand(index);
+    triggerAutoSave();
+  });
   toolManager.registerTool(eraserTool);
 
   // Helper function to update active tool button highlighting
@@ -326,10 +339,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // Wire up undo/redo button click handlers
   document.getElementById('btn-undo').addEventListener('click', () => {
     toolManager.undo();
+    triggerAutoSave();
   });
 
   document.getElementById('btn-redo').addEventListener('click', () => {
     toolManager.redo();
+    triggerAutoSave();
   });
 
   // Wire up mouse events on the animation canvas (top layer)
@@ -423,6 +438,24 @@ document.addEventListener('DOMContentLoaded', () => {
     toolManager.loadCommands(commands, false);
   });
 
+  // Auto-load saved drawing from localStorage
+  const savedCommands = loadFromLocalStorage();
+  if (savedCommands && savedCommands.length > 0) {
+    console.log(`Restoring ${savedCommands.length} commands from localStorage`);
+    toolManager.loadCommands(savedCommands, false);
+  }
+
+  // Function to clear canvas and localStorage
+  function clearCanvas() {
+    toolManager.clearAll();
+    clearLocalStorage();
+    // Redraw grid if enabled
+    drawGridIfEnabled();
+  }
+
+  // Expose for debugging and potential clear button
+  window.clearCanvas = clearCanvas;
+
   // Speed slider functionality
   const speedSlider = document.getElementById('speed-slider');
   const speedLabel = document.getElementById('speed-label');
@@ -462,6 +495,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.ctrlKey && !e.shiftKey && e.key === 'z') {
       e.preventDefault();
       toolManager.undo();
+      triggerAutoSave();
       return;
     }
 
@@ -469,6 +503,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'z') {
       e.preventDefault();
       toolManager.redo();
+      triggerAutoSave();
       return;
     }
 
