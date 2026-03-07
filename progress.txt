@@ -502,3 +502,20 @@ Project: Tektronix Graphics Terminal
   - getTekCanvas(), getAnimator() expose internal components if needed
   - destroy() cleans up resources (calls tekCanvas.destroy())
 ---
+
+## 2026-03-08 - US-033
+- What was implemented: Gallery page HTML and CSS with full layout structure
+- Files changed:
+  - gallery.html - complete layout with header, category tabs, demo grid, player view, and controls
+  - css/style.css - added gallery-specific CSS (gallery-main, player-active, param-value, loading/empty states)
+  - js/gallery-app.js - updated to work with new HTML structure (uses player-canvas-container)
+- **Learnings for future iterations:**
+  - Gallery layout uses .gallery-container > .gallery-header + .category-tabs + .gallery-main
+  - .gallery-main contains both .demo-grid and .player-view, toggled via .player-active class
+  - Category tabs use data-category attribute for filtering
+  - Demo cards have data-demo-id attribute for identifying which demo to play
+  - Player view has: #player-title (h2), #player-canvas-container (for TekCanvas), #param-sliders (dynamic)
+  - Player controls: #restart-btn, #play-pause-btn, #player-speed (slider), #player-speed-label
+  - #open-in-editor-btn for future "Open in Editor" feature (US-035)
+  - #back-btn returns to grid view (removes .player-active from .gallery-main)
+---
