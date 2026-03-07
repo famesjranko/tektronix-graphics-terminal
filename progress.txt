@@ -546,3 +546,15 @@ Project: Tektronix Graphics Terminal
   - Clear sessionStorage after loading to prevent re-loading on subsequent visits
   - After loading from gallery, trigger auto-save so commands persist in localStorage
 ---
+
+## 2026-03-08 - US-036
+- What was implemented: Docker deployment configuration with nginx
+- Files changed:
+  - Dockerfile - nginx:alpine based image, copies static files (html, css, js) to /usr/share/nginx/html
+  - docker-compose.yml - web service with port mapping 8080:80
+- **Learnings for future iterations:**
+  - nginx:alpine is lightweight (~20MB) and serves static files efficiently
+  - docker-compose.yml no longer needs `version` attribute (obsolete since compose v2)
+  - Static files are: index.html, gallery.html, css/, js/ directories
+  - Site accessible at http://localhost:8080 after `docker-compose up`
+---
