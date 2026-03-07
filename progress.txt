@@ -145,3 +145,17 @@ Project: Tektronix Graphics Terminal
   - PlotAnimator already supports circle commands with arc animation (circumference draws progressively)
   - VectorRenderer.drawCircle expects radius relative to canvas width (normalized)
 ---
+
+## 2026-03-07 - US-011
+- What was implemented: ArcTool for drawing arcs with multi-step interaction
+- Files changed:
+  - js/tools/ArcTool.js - new file extending BaseTool with 3-step interaction
+  - js/app.js - registered ArcTool, added 'A' keyboard shortcut
+- **Learnings for future iterations:**
+  - ArcTool uses multi-step state machine: step=0 idle, step=1 dragging radius, step=2 setting start angle, step=3 setting end angle
+  - Math.atan2(dy, dx) calculates angle from center to mouse position
+  - Preview shows guide lines from center to arc endpoints during angle selection
+  - Arc command format: {type: 'arc', cx, cy, radius, startAngle, endAngle, color}
+  - PlotAnimator already supports arc commands with progressive animation along the arc
+  - VectorRenderer.drawArc expects angles in radians
+---
