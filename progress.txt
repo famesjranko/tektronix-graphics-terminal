@@ -447,3 +447,19 @@ Project: Tektronix Graphics Terminal
   - Coordinate data can be highly simplified/stylized - PRD allows artistic interpretation
   - mapsDemos array exported as default for GalleryManager integration
 ---
+
+## 2026-03-08 - US-030
+- What was implemented: Technical gallery demos with four engineering/technical visualizations
+- Files changed:
+  - js/gallery/graphics/technical.js - new file with 4 technical demos
+  - js/gallery-app.js - added import and test for technicalDemos
+- **Learnings for future iterations:**
+  - Technical demos follow same pattern: {id, name, category, description, thumbnail, params, *generate(params)}
+  - Category is 'technical' for engineering/technical demos
+  - Circuit schematic: uses helper functions drawAndGate, drawOrGate, drawNotGate, drawNandGate for reusable gate symbols
+  - Oscilloscope: draws waveforms (sine, square, sawtooth) with configurable frequency and amplitude, includes grid and decorative knobs
+  - Logic gates: reference diagram showing AND, OR, NOT, NAND, NOR, XOR, Buffer, XNOR, and Tri-state symbols with input/output connections
+  - Block diagram: system architecture style with boxes, arrows, and varying complexity levels (simple to full)
+  - Arrow drawing uses Math.atan2 for direction calculation with configurable arrowhead angles
+  - technicalDemos array exported as default for GalleryManager integration
+---
