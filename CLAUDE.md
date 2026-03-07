@@ -22,7 +22,7 @@ This is a vanilla JS + Canvas 2D project recreating the Tektronix vector graphic
 5. Implement that single user story
 6. Test your implementation (open in browser if UI-related)
 7. Update CLAUDE.md files if you discover reusable patterns (see below)
-8. If implementation works, commit ALL changes with message: `feat: [Story ID] - [Story Title]`
+8. If implementation works, commit ALL changes with message: `feat: [Story ID] - [Story Title]` (no co-author lines)
 9. Update the PRD to set `passes: true` for the completed story
 10. Append your progress to `progress.txt`
 
