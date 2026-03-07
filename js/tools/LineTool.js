@@ -19,8 +19,29 @@ export class LineTool extends BaseTool {
     this.startX = 0;
     this.startY = 0;
 
+    // Line style: solid, dashed, dotted
+    this.lineStyle = 'solid';
+
     // Callback for when a command is created
     this.onCommand = null;
+  }
+
+  /**
+   * Set the line style
+   * @param {string} style - 'solid', 'dashed', or 'dotted'
+   */
+  setLineStyle(style) {
+    if (['solid', 'dashed', 'dotted'].includes(style)) {
+      this.lineStyle = style;
+    }
+  }
+
+  /**
+   * Get the current line style
+   * @returns {string}
+   */
+  getLineStyle() {
+    return this.lineStyle;
   }
 
   /**
@@ -55,7 +76,7 @@ export class LineTool extends BaseTool {
     // Clear previous preview and draw new one
     this.clearPreview();
     const ctx = this.getPreviewContext();
-    this.renderer.drawLine(ctx, this.startX, this.startY, x, y, this.color);
+    this.renderer.drawLine(ctx, this.startX, this.startY, x, y, this.color, this.lineStyle);
   }
 
   /**
@@ -85,7 +106,8 @@ export class LineTool extends BaseTool {
       y1: this.startY,
       x2: x,
       y2: y,
-      color: this.color
+      color: this.color,
+      style: this.lineStyle
     };
 
     // Emit command via callback

@@ -202,7 +202,7 @@ export class ToolManager {
 
     switch (cmd.type) {
       case 'line':
-        this.renderer.drawLine(ctx, cmd.x1, cmd.y1, cmd.x2, cmd.y2, color);
+        this.renderer.drawLine(ctx, cmd.x1, cmd.y1, cmd.x2, cmd.y2, color, cmd.style || 'solid');
         break;
       case 'circle':
         this.renderer.drawCircle(ctx, cmd.cx, cmd.cy, cmd.radius, color, cmd.filled || false);

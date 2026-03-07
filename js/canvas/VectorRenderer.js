@@ -42,17 +42,31 @@ export class VectorRenderer {
    * @param {number} x2 - End X (normalized 0-1)
    * @param {number} y2 - End Y (normalized 0-1)
    * @param {string} color - Stroke color (default: primary green)
+   * @param {string} style - Line style: 'solid', 'dashed', 'dotted' (default: 'solid')
    */
-  drawLine(ctx, x1, y1, x2, y2, color = DEFAULT_COLOR) {
+  drawLine(ctx, x1, y1, x2, y2, color = DEFAULT_COLOR, style = 'solid') {
     const start = this.tekCanvas.fromNormalized(x1, y1);
     const end = this.tekCanvas.fromNormalized(x2, y2);
 
     this._prepareContext(ctx);
     ctx.strokeStyle = color;
+
+    // Set line dash pattern based on style
+    if (style === 'dashed') {
+      ctx.setLineDash([8, 4]);
+    } else if (style === 'dotted') {
+      ctx.setLineDash([2, 4]);
+    } else {
+      ctx.setLineDash([]);
+    }
+
     ctx.beginPath();
     ctx.moveTo(this._crisp(start.x), this._crisp(start.y));
     ctx.lineTo(this._crisp(end.x), this._crisp(end.y));
     ctx.stroke();
+
+    // Reset line dash
+    ctx.setLineDash([]);
   }
 
   /**

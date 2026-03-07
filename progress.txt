@@ -272,3 +272,22 @@ Project: Tektronix Graphics Terminal
   - Space pauses/resumes animation via animator.pause()/resume() with isPaused check
   - Options panel needs pointer-events: none when closed to avoid blocking canvas clicks
 ---
+
+## 2026-03-07 - US-019
+- What was implemented: Tool options panels with per-tool settings
+- Files changed:
+  - js/app.js - showOptionsPanel() dynamically creates options UI, localStorage persistence
+  - js/tools/LineTool.js - added setLineStyle()/getLineStyle() for solid/dashed/dotted
+  - js/tools/RectTool.js - added setFilled()/getFilled() for filled toggle
+  - js/tools/CircleTool.js - added setFilled()/getFilled() for filled toggle
+  - js/canvas/VectorRenderer.js - drawLine() supports style parameter for dashed/dotted lines
+  - js/canvas/PlotAnimator.js - passes line style to renderer during animation
+  - js/tools/ToolManager.js - passes line style in _drawCommand for undo/redo
+- **Learnings for future iterations:**
+  - Tool options stored in localStorage via loadToolOptions()/saveToolOption() functions
+  - showOptionsPanel() creates controls dynamically based on active tool name
+  - Tools without options (arc, eraser) close the panel by removing .open class
+  - createSelect() and createCheckbox() helper functions for building form controls
+  - VectorRenderer uses ctx.setLineDash([8,4]) for dashed, [2,4] for dotted lines
+  - TextTool uses .scale property directly (public), FillTool uses getPattern()/setPattern()
+---

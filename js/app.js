@@ -16,6 +16,28 @@ import { TextTool } from './tools/TextTool.js';
 import { FillTool } from './tools/FillTool.js';
 import { EraserTool } from './tools/EraserTool.js';
 
+// Tool options storage key
+const TOOL_OPTIONS_KEY = 'tektronix-tool-options';
+
+// Load saved tool options from localStorage
+function loadToolOptions() {
+  try {
+    const saved = localStorage.getItem(TOOL_OPTIONS_KEY);
+    return saved ? JSON.parse(saved) : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+// Save tool options to localStorage
+function saveToolOptions(options) {
+  try {
+    localStorage.setItem(TOOL_OPTIONS_KEY, JSON.stringify(options));
+  } catch (e) {
+    // Ignore storage errors
+  }
+}
+
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
   console.log('Tektronix Graphics Terminal initializing...');
@@ -86,10 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
   eraserTool.setRemoveCommandCallback((index) => toolManager.removeCommand(index));
   toolManager.registerTool(eraserTool);
 
-  // Set line tool as default active tool
-  toolManager.setActiveTool('line');
-  updateActiveToolButton('line');
-
   // Helper function to update active tool button highlighting
   function updateActiveToolButton(toolName) {
     // Remove active class from all tool buttons
@@ -103,10 +121,191 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Tool options panel elements
+  const optionsPanel = document.getElementById('options-panel');
+  const optionsTitle = document.getElementById('options-title');
+  const optionsContent = document.getElementById('options-content');
+
+  // Load saved options
+  const savedOptions = loadToolOptions();
+
+  // Apply saved options to tools
+  if (savedOptions.line?.style) {
+    lineTool.setLineStyle(savedOptions.line.style);
+  }
+  if (savedOptions.rect?.filled !== undefined) {
+    rectTool.setFilled(savedOptions.rect.filled);
+  }
+  if (savedOptions.circle?.filled !== undefined) {
+    circleTool.setFilled(savedOptions.circle.filled);
+  }
+  if (savedOptions.text?.scale !== undefined) {
+    textTool.setScale(savedOptions.text.scale);
+  }
+  if (savedOptions.fill?.pattern) {
+    fillTool.setPattern(savedOptions.fill.pattern);
+  }
+
+  // Save a single tool option to localStorage
+  function saveToolOption(tool, key, value) {
+    const options = loadToolOptions();
+    if (!options[tool]) options[tool] = {};
+    options[tool][key] = value;
+    saveToolOptions(options);
+  }
+
+  // Create a select element with options
+  function createSelect(id, options, selectedValue) {
+    const select = document.createElement('select');
+    select.id = id;
+    options.forEach(opt => {
+      const option = document.createElement('option');
+      option.value = opt.value;
+      option.textContent = opt.label;
+      if (opt.value === selectedValue || opt.value === String(selectedValue)) {
+        option.selected = true;
+      }
+      select.appendChild(option);
+    });
+    return select;
+  }
+
+  // Create a checkbox element
+  function createCheckbox(id, label, checked) {
+    const container = document.createElement('label');
+    container.className = 'checkbox-container';
+
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.id = id;
+    input.checked = checked;
+
+    const checkmark = document.createElement('span');
+    checkmark.className = 'checkmark';
+
+    const labelSpan = document.createElement('span');
+    labelSpan.className = 'checkbox-label';
+    labelSpan.textContent = label;
+
+    container.appendChild(input);
+    container.appendChild(checkmark);
+    container.appendChild(labelSpan);
+
+    return container;
+  }
+
+  // Create an option group
+  function createOptionGroup(labelText, control) {
+    const group = document.createElement('div');
+    group.className = 'option-group';
+
+    if (labelText && control.tagName === 'SELECT') {
+      const label = document.createElement('label');
+      label.setAttribute('for', control.id);
+      label.textContent = labelText;
+      group.appendChild(label);
+    }
+
+    group.appendChild(control);
+    return group;
+  }
+
+  // Show options panel for a tool
+  function showOptionsPanel(toolName) {
+    // Clear existing content
+    while (optionsContent.firstChild) {
+      optionsContent.removeChild(optionsContent.firstChild);
+    }
+
+    switch (toolName) {
+      case 'line': {
+        optionsTitle.textContent = 'Line Options';
+        const select = createSelect('line-style', [
+          { value: 'solid', label: 'Solid' },
+          { value: 'dashed', label: 'Dashed' },
+          { value: 'dotted', label: 'Dotted' }
+        ], lineTool.getLineStyle());
+        select.addEventListener('change', () => {
+          lineTool.setLineStyle(select.value);
+          saveToolOption('line', 'style', select.value);
+        });
+        optionsContent.appendChild(createOptionGroup('Style', select));
+        optionsPanel.classList.add('open');
+        break;
+      }
+      case 'rect': {
+        optionsTitle.textContent = 'Rectangle Options';
+        const checkbox = createCheckbox('rect-filled', 'Filled', rectTool.getFilled());
+        checkbox.querySelector('input').addEventListener('change', (e) => {
+          rectTool.setFilled(e.target.checked);
+          saveToolOption('rect', 'filled', e.target.checked);
+        });
+        optionsContent.appendChild(createOptionGroup(null, checkbox));
+        optionsPanel.classList.add('open');
+        break;
+      }
+      case 'circle': {
+        optionsTitle.textContent = 'Circle Options';
+        const checkbox = createCheckbox('circle-filled', 'Filled', circleTool.getFilled());
+        checkbox.querySelector('input').addEventListener('change', (e) => {
+          circleTool.setFilled(e.target.checked);
+          saveToolOption('circle', 'filled', e.target.checked);
+        });
+        optionsContent.appendChild(createOptionGroup(null, checkbox));
+        optionsPanel.classList.add('open');
+        break;
+      }
+      case 'text': {
+        optionsTitle.textContent = 'Text Options';
+        const select = createSelect('text-scale', [
+          { value: '0.5', label: '0.5x' },
+          { value: '1', label: '1x' },
+          { value: '2', label: '2x' },
+          { value: '3', label: '3x' }
+        ], String(textTool.scale));
+        select.addEventListener('change', () => {
+          const scale = parseFloat(select.value);
+          textTool.setScale(scale);
+          saveToolOption('text', 'scale', scale);
+        });
+        optionsContent.appendChild(createOptionGroup('Scale', select));
+        optionsPanel.classList.add('open');
+        break;
+      }
+      case 'fill': {
+        optionsTitle.textContent = 'Fill Options';
+        const select = createSelect('fill-pattern', [
+          { value: 'crosshatch', label: 'Crosshatch' },
+          { value: 'horizontal', label: 'Horizontal' },
+          { value: 'vertical', label: 'Vertical' },
+          { value: 'diagonal45', label: 'Diagonal 45°' },
+          { value: 'diagonal135', label: 'Diagonal 135°' },
+          { value: 'dots', label: 'Dots' }
+        ], fillTool.getPattern());
+        select.addEventListener('change', () => {
+          fillTool.setPattern(select.value);
+          saveToolOption('fill', 'pattern', select.value);
+        });
+        optionsContent.appendChild(createOptionGroup('Pattern', select));
+        optionsPanel.classList.add('open');
+        break;
+      }
+      default:
+        // No options for this tool - hide panel
+        optionsPanel.classList.remove('open');
+    }
+  }
+
+  // Set line tool as default active tool (after options loaded)
+  toolManager.setActiveTool('line');
+  updateActiveToolButton('line');
+  showOptionsPanel('line');
+
   // Helper function to switch tool and update UI
   function switchTool(toolName) {
     toolManager.setActiveTool(toolName);
     updateActiveToolButton(toolName);
+    showOptionsPanel(toolName);
   }
 
   // Wire up tool button click handlers

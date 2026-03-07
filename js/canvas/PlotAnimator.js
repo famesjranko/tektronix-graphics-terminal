@@ -315,7 +315,7 @@ export class PlotAnimator extends EventTarget {
   _drawLineProgress(ctx, command, progress, color) {
     const x2 = command.x1 + (command.x2 - command.x1) * progress;
     const y2 = command.y1 + (command.y2 - command.y1) * progress;
-    this.renderer.drawLine(ctx, command.x1, command.y1, x2, y2, color);
+    this.renderer.drawLine(ctx, command.x1, command.y1, x2, y2, color, command.style || 'solid');
   }
 
   /**
@@ -469,7 +469,7 @@ export class PlotAnimator extends EventTarget {
 
     switch (command.type) {
       case 'line':
-        this.renderer.drawLine(ctx, command.x1, command.y1, command.x2, command.y2, color);
+        this.renderer.drawLine(ctx, command.x1, command.y1, command.x2, command.y2, color, command.style || 'solid');
         break;
       case 'circle':
         this.renderer.drawCircle(ctx, command.cx, command.cy, command.radius, color, command.filled || false);

@@ -19,8 +19,27 @@ export class RectTool extends BaseTool {
     this.startX = 0;
     this.startY = 0;
 
+    // Whether to draw filled rectangles
+    this.filled = false;
+
     // Callback for when a command is created
     this.onCommand = null;
+  }
+
+  /**
+   * Set whether rectangles are filled
+   * @param {boolean} filled
+   */
+  setFilled(filled) {
+    this.filled = !!filled;
+  }
+
+  /**
+   * Get whether rectangles are filled
+   * @returns {boolean}
+   */
+  getFilled() {
+    return this.filled;
   }
 
   /**
@@ -59,7 +78,7 @@ export class RectTool extends BaseTool {
     // Calculate rectangle bounds (normalize so x,y is always top-left)
     const { rectX, rectY, width, height } = this._normalizeRect(this.startX, this.startY, x, y);
 
-    this.renderer.drawRect(ctx, rectX, rectY, width, height, this.color, false);
+    this.renderer.drawRect(ctx, rectX, rectY, width, height, this.color, this.filled);
   }
 
   /**
@@ -90,7 +109,7 @@ export class RectTool extends BaseTool {
       y: rectY,
       width: width,
       height: height,
-      filled: false,
+      filled: this.filled,
       color: this.color
     };
 
