@@ -9,6 +9,7 @@ import { geometricDemos } from './gallery/graphics/geometric.js';
 import { threedDemos } from './gallery/graphics/threed.js';
 import { dataDemos } from './gallery/graphics/data.js';
 import { mapsDemos } from './gallery/graphics/maps.js';
+import { technicalDemos } from './gallery/graphics/technical.js';
 
 // Log startup to verify module loading works
 console.log('Tektronix Gallery initializing...');
@@ -35,5 +36,6 @@ testDemos(geometricDemos, 'Geometric');
 testDemos(threedDemos, '3D Wireframe');
 testDemos(dataDemos, 'Data Visualization');
 testDemos(mapsDemos, 'Maps & Astronomy');
+testDemos(technicalDemos, 'Technical');
 
 // Placeholder - GalleryManager will be initialized here in US-034
