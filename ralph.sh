@@ -91,19 +91,29 @@ for i in $(seq 1 $MAX_ITERATIONS); do
   if [[ "$TOOL" == "amp" ]]; then
     OUTPUT=$(cat "$SCRIPT_DIR/prompt.md" | amp --dangerously-allow-all 2>&1 | tee /dev/stderr) || true
   else
-    # Claude Code: use --dangerously-skip-permissions for autonomous operation, --print for output
-    OUTPUT=$(claude --dangerously-skip-permissions --print < "$SCRIPT_DIR/CLAUDE.md" 2>&1 | tee /dev/stderr) || true
+    # Claude Code: use -p to pass prompt, --dangerously-skip-permissions for autonomous operation
+    PROMPT=$(cat "$SCRIPT_DIR/CLAUDE.md")
+    OUTPUT=$(claude --dangerously-skip-permissions -p "$PROMPT" 2>&1 | tee /dev/stderr) || true
   fi
 
   # Check for completion signal
   if echo "$OUTPUT" | grep -q "<promise>COMPLETE</promise>"; then
     echo ""
-    echo "Ralph completed all tasks!"
-    echo "Completed at iteration $i of $MAX_ITERATIONS"
+    echo "========================================="
+    echo "  Ralph completed all tasks!"
+    echo "  Finished at iteration $i of $MAX_ITERATIONS"
+    echo "========================================="
     exit 0
   fi
 
-  echo "Iteration $i complete. Continuing..."
+  # Check for iteration-done signal (confirms single-story completion)
+  if echo "$OUTPUT" | grep -q "<iteration-done>"; then
+    echo ""
+    echo ">>> Iteration $i complete (story done). Starting fresh context..."
+  else
+    echo ""
+    echo ">>> Iteration $i ended. Starting fresh context..."
+  fi
   sleep 2
 done
 

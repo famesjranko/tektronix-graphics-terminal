@@ -99,19 +99,33 @@ For any story that changes UI, verify it works in the browser:
 
 A frontend story is NOT complete until it works in browser.
 
-## Stop Condition
+## CRITICAL: One Story Per Session
 
-After completing a user story, check if ALL stories have `passes: true`.
+You MUST complete exactly ONE user story per session, then STOP.
 
-If ALL stories are complete and passing, reply with:
+After completing the story (commit + prd.json update + progress.txt update):
+
+1. Check if ALL stories now have `passes: true`
+2. Output ONE of these markers and STOP IMMEDIATELY:
+
+If ALL stories complete:
+```
 <promise>COMPLETE</promise>
+```
 
-If there are still stories with `passes: false`, end your response normally (another iteration will pick up the next story).
+If more stories remain:
+```
+<iteration-done>
+```
+
+**DO NOT continue to the next story.** The loop will spawn a fresh instance for the next story. This is essential for context management.
 
 ## Important
 
-- Work on ONE story per iteration
-- Commit after each completed story
+- Complete exactly ONE story, then STOP
+- Output `<iteration-done>` or `<promise>COMPLETE</promise>` as your final output
+- Do NOT start working on another story
+- Commit after completing the story
 - Keep changes focused and minimal
 - Read the Codebase Patterns section in progress.txt before starting
 - Don't over-engineer - follow the PRD specs exactly
