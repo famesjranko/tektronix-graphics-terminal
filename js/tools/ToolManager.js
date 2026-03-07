@@ -28,6 +28,18 @@ export class ToolManager {
     // Command history for undo/redo
     this.commandHistory = [];
     this.undoStack = [];
+
+    // Callback for when canvas is cleared (for grid redraw)
+    this.onBeforeDraw = null;
+  }
+
+  /**
+   * Set callback to be called after clearing but before drawing commands
+   * Useful for redrawing grid when canvas is cleared
+   * @param {Function} callback
+   */
+  setOnBeforeDraw(callback) {
+    this.onBeforeDraw = callback;
   }
 
   /**
@@ -181,6 +193,11 @@ export class ToolManager {
 
     // Clear the persistent canvas
     this.tekCanvas.clearPersistent();
+
+    // Call onBeforeDraw callback (e.g., to redraw grid)
+    if (this.onBeforeDraw) {
+      this.onBeforeDraw();
+    }
 
     // Get the persistent context
     const ctx = this.tekCanvas.getPersistentContext();

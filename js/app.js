@@ -16,8 +16,9 @@ import { TextTool } from './tools/TextTool.js';
 import { FillTool } from './tools/FillTool.js';
 import { EraserTool } from './tools/EraserTool.js';
 
-// Tool options storage key
+// Storage keys
 const TOOL_OPTIONS_KEY = 'tektronix-tool-options';
+const GRID_STATE_KEY = 'tektronix-grid-enabled';
 
 // Load saved tool options from localStorage
 function loadToolOptions() {
@@ -361,6 +362,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Position display element
+  const positionDisplay = document.getElementById('position-display');
+
   // Handle mouse leaving the canvas while drawing
   canvas.addEventListener('mouseleave', (e) => {
     const tool = toolManager.getActiveTool();
@@ -371,6 +375,46 @@ document.addEventListener('DOMContentLoaded', () => {
       const normalized = tekCanvas.toNormalized(x, y);
       tool.onMouseUp(normalized.x, normalized.y);
     }
+    // Clear position display when mouse leaves
+    positionDisplay.textContent = 'X: --- Y: ---';
+  });
+
+  // Update position display on mousemove
+  canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = Math.round(e.clientX - rect.left);
+    const y = Math.round(e.clientY - rect.top);
+    positionDisplay.textContent = `X: ${x} Y: ${y}`;
+  });
+
+  // Grid toggle functionality
+  const gridToggle = document.getElementById('grid-toggle');
+
+  // Function to draw grid if enabled (called by ToolManager before drawing commands)
+  function drawGridIfEnabled() {
+    if (gridToggle.checked) {
+      tekCanvas.drawGrid();
+    }
+  }
+
+  // Set callback so grid is redrawn on undo/redo/load
+  toolManager.setOnBeforeDraw(drawGridIfEnabled);
+
+  // Load saved grid state
+  const savedGridState = localStorage.getItem(GRID_STATE_KEY);
+  if (savedGridState === 'true') {
+    gridToggle.checked = true;
+    tekCanvas.drawGrid();
+  }
+
+  // Handle grid toggle change
+  gridToggle.addEventListener('change', () => {
+    const showGrid = gridToggle.checked;
+    // Save state to localStorage
+    localStorage.setItem(GRID_STATE_KEY, showGrid);
+    // Redraw all commands (callback handles grid)
+    const commands = toolManager.getCommands();
+    toolManager.loadCommands(commands, false);
   });
 
   // Handle keyboard shortcuts

@@ -8,7 +8,7 @@
  * - Normalized coordinates (0-1 range)
  */
 
-import { COLORS } from '../utils/colors.js';
+import { COLORS, GRID_COLOR, GRID_OPACITY } from '../utils/colors.js';
 
 export class TekCanvas {
   /**
@@ -163,6 +163,38 @@ export class TekCanvas {
   clearAll() {
     this.clearPersistent();
     this.clearAnimation();
+  }
+
+  /**
+   * Draw background grid on persistent layer
+   * Grid: 50px spacing, --tek-dim color at 30% opacity
+   */
+  drawGrid() {
+    const ctx = this.persistentCtx;
+    const spacing = 50;
+
+    ctx.save();
+    ctx.strokeStyle = GRID_COLOR;
+    ctx.globalAlpha = GRID_OPACITY;
+    ctx.lineWidth = 1;
+
+    // Draw vertical lines
+    for (let x = spacing; x < this.width; x += spacing) {
+      ctx.beginPath();
+      ctx.moveTo(Math.floor(x) + 0.5, 0);
+      ctx.lineTo(Math.floor(x) + 0.5, this.height);
+      ctx.stroke();
+    }
+
+    // Draw horizontal lines
+    for (let y = spacing; y < this.height; y += spacing) {
+      ctx.beginPath();
+      ctx.moveTo(0, Math.floor(y) + 0.5);
+      ctx.lineTo(this.width, Math.floor(y) + 0.5);
+      ctx.stroke();
+    }
+
+    ctx.restore();
   }
 
   /**
