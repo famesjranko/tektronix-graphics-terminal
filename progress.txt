@@ -484,3 +484,21 @@ Project: Tektronix Graphics Terminal
   - Fill commands use pre-computed .lines array stored on the command
   - Additional helper methods: getDemoCount(), getCategoryCount(category)
 ---
+
+## 2026-03-08 - US-032
+- What was implemented: GraphicPlayer class for demo playback with full animation controls
+- Files changed:
+  - js/gallery/GraphicPlayer.js - new file with GraphicPlayer class
+  - js/gallery-app.js - added GraphicPlayer import and test code
+- **Learnings for future iterations:**
+  - GraphicPlayer takes demo object and container element in constructor
+  - Internally creates TekCanvas, VectorRenderer, and PlotAnimator for rendering
+  - play() starts or resumes playback, pause() pauses, restart() clears and regenerates
+  - setSpeed(pxPerSec) updates PlotAnimator speed in real-time
+  - setParam(name, value) and setParams(params) update demo parameters and auto-restart
+  - getParams(), getParamDefinitions() for accessing parameter info
+  - Extends EventTarget and emits 'complete' event (forwarded from PlotAnimator)
+  - loadDemo(demo) allows switching to a different demo
+  - getTekCanvas(), getAnimator() expose internal components if needed
+  - destroy() cleans up resources (calls tekCanvas.destroy())
+---
