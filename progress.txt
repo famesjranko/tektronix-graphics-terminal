@@ -558,3 +558,14 @@ Project: Tektronix Graphics Terminal
   - Static files are: index.html, gallery.html, css/, js/ directories
   - Site accessible at http://localhost:8080 after `docker-compose up`
 ---
+
+## 2026-03-08 - US-037
+- What was implemented: README documentation with setup, usage, and license
+- Files changed:
+  - README.md - new file with comprehensive project documentation
+- **Learnings for future iterations:**
+  - README includes: project description, quick start (Docker), development instructions, keyboard shortcuts, file format docs, MIT license
+  - File format (.tek.json) uses normalized 0-1 coordinates for resolution independence
+  - Keyboard shortcuts are tool keys (L/R/C/A/T/F/E) plus action keys (Ctrl+Z/S/O/E, G, Space)
+  - Screenshot placeholder included - replace with actual screenshot when available
+---
