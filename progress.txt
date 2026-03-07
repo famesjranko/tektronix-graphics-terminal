@@ -291,3 +291,17 @@ Project: Tektronix Graphics Terminal
   - VectorRenderer uses ctx.setLineDash([8,4]) for dashed, [2,4] for dotted lines
   - TextTool uses .scale property directly (public), FillTool uses getPattern()/setPattern()
 ---
+
+## 2026-03-07 - US-020
+- What was implemented: Grid toggle and position display
+- Files changed:
+  - js/canvas/TekCanvas.js - added drawGrid() method with 50px spacing, GRID_COLOR at GRID_OPACITY
+  - js/tools/ToolManager.js - added setOnBeforeDraw() callback for grid redraw on undo/redo
+  - js/app.js - wired up grid toggle with localStorage, position display on mousemove
+- **Learnings for future iterations:**
+  - Grid uses GRID_COLOR and GRID_OPACITY from colors.js (already defined)
+  - ToolManager.setOnBeforeDraw() callback is called after clearPersistent() but before drawing commands
+  - Grid state stored in localStorage with key 'tektronix-grid-enabled'
+  - Position display shows rounded pixel coordinates, clears to 'X: --- Y: ---' on mouseleave
+  - When clearing/redrawing canvas, grid must be redrawn first (via onBeforeDraw callback)
+---
