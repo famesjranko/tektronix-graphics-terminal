@@ -9,6 +9,8 @@ Project: Tektronix Graphics Terminal
 - TekCanvas: getPersistentContext() for final drawings, getAnimationContext() for previews
 - Coordinates: toNormalized(x,y) and fromNormalized(x,y) convert between pixels and 0-1 range
 - TekCanvas exports getWidth()/getHeight() for sizing calculations
+- VectorRenderer: pass context + normalized coords, handles pixel conversion internally
+- VectorRenderer uses _crisp() for sharp 1px lines (Math.floor(coord) + 0.5)
 
 ---
 
@@ -39,4 +41,17 @@ Project: Tektronix Graphics Terminal
   - getWidth()/getHeight() return CSS pixel dimensions (not physical pixels)
   - clearAnimation() clears preview layer, clearPersistent() clears finished layer
   - HiDPI handled via setTransform() - draw in CSS pixels, canvas scales automatically
+---
+
+## 2026-03-07 - US-003
+- What was implemented: VectorRenderer class for drawing primitives with crisp lines
+- Files changed:
+  - js/canvas/VectorRenderer.js - new file with drawing methods
+  - js/app.js - updated to test all VectorRenderer primitives
+- **Learnings for future iterations:**
+  - VectorRenderer takes TekCanvas in constructor for coordinate conversion
+  - All draw methods: drawLine, drawCircle, drawRect, drawArc
+  - Coords are normalized 0-1, radius is relative to canvas width
+  - filled parameter (default false) controls stroke vs fill for shapes
+  - _crisp() method offsets by 0.5 for sharp 1px lines on pixel boundaries
 ---
