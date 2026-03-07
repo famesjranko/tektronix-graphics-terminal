@@ -430,3 +430,20 @@ Project: Tektronix Graphics Terminal
   - Sample data embedded directly in the module as constants (SAMPLE_BAR_DATA, etc.)
   - All charts use normalized 0-1 coordinates with margins for axes (left=0.1-0.12, right=0.92, etc.)
 ---
+
+## 2026-03-08 - US-029
+- What was implemented: Maps and astronomy gallery demos with four visualization types
+- Files changed:
+  - js/gallery/graphics/maps.js - new file with 4 maps/astronomy demos
+  - js/gallery-app.js - added import and test for mapsDemos
+- **Learnings for future iterations:**
+  - Maps demos follow same pattern: {id, name, category, description, thumbnail, params, *generate(params)}
+  - Category is 'maps' for geography and astronomy demos
+  - World map: simplified continent outlines stored as coordinate arrays in WORLD_CONTINENTS object
+  - USA map: continental outline + internal state-like divisions + city markers, includes Alaska/Hawaii hints
+  - Earth globe: reuses 3D projection math (rotateX3D, rotateY3D, project3D functions), lat/lon grid + continent hints
+  - Solar system: orbital diagram with sun, planets, Saturn's rings, and asteroid belt hints
+  - For 3D globe, only draw front-facing elements (check point.z < threshold after rotation)
+  - Coordinate data can be highly simplified/stylized - PRD allows artistic interpretation
+  - mapsDemos array exported as default for GalleryManager integration
+---
