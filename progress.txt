@@ -6,6 +6,9 @@ Project: Tektronix Graphics Terminal
 - Use ES6 modules with `<script type="module">` in HTML
 - Import colors from `./utils/colors.js` - exports COLORS object and DEFAULT_COLOR
 - CSS variables match JS constants: --tek-primary = COLORS.primary
+- TekCanvas: getPersistentContext() for final drawings, getAnimationContext() for previews
+- Coordinates: toNormalized(x,y) and fromNormalized(x,y) convert between pixels and 0-1 range
+- TekCanvas exports getWidth()/getHeight() for sizing calculations
 
 ---
 
@@ -22,4 +25,18 @@ Project: Tektronix Graphics Terminal
   - Both HTML files use `<script type="module">` for ES6 imports
   - Canvas container uses id="canvas-container" - TekCanvas will create canvases inside
   - Color palette available in both CSS (variables) and JS (COLORS export)
+---
+
+## 2026-03-07 - US-002
+- What was implemented: TekCanvas dual-layer canvas system with HiDPI support
+- Files changed:
+  - js/canvas/TekCanvas.js - new file with TekCanvas class
+  - js/app.js - imports and initializes TekCanvas with test diagonal line
+- **Learnings for future iterations:**
+  - TekCanvas creates two canvases: persistent-canvas and animation-canvas (animation on top)
+  - Use getPersistentContext() for finished drawings, getAnimationContext() for previews
+  - toNormalized(x,y) converts pixel coords to 0-1, fromNormalized(x,y) converts back
+  - getWidth()/getHeight() return CSS pixel dimensions (not physical pixels)
+  - clearAnimation() clears preview layer, clearPersistent() clears finished layer
+  - HiDPI handled via setTransform() - draw in CSS pixels, canvas scales automatically
 ---
