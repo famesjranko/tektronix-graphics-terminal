@@ -519,3 +519,17 @@ Project: Tektronix Graphics Terminal
   - #open-in-editor-btn for future "Open in Editor" feature (US-035)
   - #back-btn returns to grid view (removes .player-active from .gallery-main)
 ---
+
+## 2026-03-08 - US-034
+- What was implemented: Gallery app.js wiring with full functionality
+- Files changed:
+  - js/gallery-app.js - complete rewrite with thumbnail grid, category filtering, player controls, URL-based direct linking
+- **Learnings for future iterations:**
+  - clearElement() helper function removes children safely instead of innerHTML = ''
+  - GalleryManager.generateThumbnail() returns canvas element, append directly to card
+  - GraphicPlayer.setParam() auto-restarts the demo with new parameters
+  - URL hash format: #demo={demoId} for direct linking (e.g., #demo=spirograph)
+  - Use history.pushState for URL updates, history.replaceState for clearing invalid hashes
+  - hashchange event listener handles browser back/forward navigation
+  - Speed slider uses indices 0-4 mapped to SPEED_VALUES [100, 300, 800, 2000, Infinity]
+---
