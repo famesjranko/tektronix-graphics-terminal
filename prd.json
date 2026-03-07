@@ -1,0 +1,634 @@
+{
+  "project": "Tektronix Graphics Terminal",
+  "branchName": "ralph/tektronix-v1",
+  "description": "Web app recreating the Tektronix vector graphics terminal experience with drawing tools and gallery",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Project scaffolding and file structure",
+      "description": "Set up the basic project structure with HTML entry points, CSS, and JS directories.",
+      "acceptanceCriteria": [
+        "Create index.html with basic HTML5 boilerplate and canvas element",
+        "Create gallery.html with basic HTML5 boilerplate",
+        "Create css/style.css with CSS reset and color variables from PRD",
+        "Create empty js/ directory structure: js/canvas/, js/tools/, js/gallery/, js/utils/",
+        "Create js/utils/colors.js exporting the color palette constants",
+        "Both HTML files load style.css and have dark background"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "TekCanvas dual-layer canvas setup",
+      "description": "Create the dual-canvas system with HiDPI support and resize handling.",
+      "acceptanceCriteria": [
+        "Create js/canvas/TekCanvas.js as ES6 class",
+        "Implements dual canvas: persistent layer + animation layer",
+        "HiDPI scaling via devicePixelRatio",
+        "Responsive resize handling (canvas fills container)",
+        "Coordinates normalized to 0-1 range internally",
+        "Export methods: getContext(), toNormalized(x,y), fromNormalized(x,y)",
+        "index.html imports and initializes TekCanvas"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "VectorRenderer for drawing primitives",
+      "description": "Create rendering utilities for crisp vector drawing.",
+      "acceptanceCriteria": [
+        "Create js/canvas/VectorRenderer.js as ES6 class",
+        "Methods: drawLine(ctx, x1, y1, x2, y2, color), drawCircle(ctx, cx, cy, r, color, filled), drawRect(ctx, x, y, w, h, color, filled), drawArc(ctx, cx, cy, r, startAngle, endAngle, color)",
+        "All coordinates in normalized 0-1 space, converted at draw time",
+        "Uses crisp 1px lines (avoid anti-aliasing blur)",
+        "Default color is --tek-primary (#00FF88)"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "PlotAnimator animation queue",
+      "description": "Create the animation engine that draws lines progressively.",
+      "acceptanceCriteria": [
+        "Create js/canvas/PlotAnimator.js as ES6 class",
+        "Accepts TekCanvas and VectorRenderer in constructor",
+        "queue(command) - adds draw command to FIFO queue",
+        "Commands: {type: 'line', x1, y1, x2, y2}, {type: 'circle', cx, cy, radius}, etc.",
+        "Animates lines from start to end based on speed (px/sec)",
+        "Speed configurable: 100, 300, 800, 2000, Infinity",
+        "pause(), resume(), skip() methods",
+        "Emits 'complete' event when queue empties"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Test animation with manual commands",
+      "description": "Wire up basic test to verify animation system works.",
+      "acceptanceCriteria": [
+        "Create js/app.js that initializes TekCanvas, VectorRenderer, PlotAnimator",
+        "On page load, queue several test lines that form a simple shape (triangle or square)",
+        "Lines animate visibly at default speed (800 px/sec)",
+        "Opening index.html in browser shows animated drawing",
+        "Console logs 'Animation complete' when done"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "BaseTool abstract class",
+      "description": "Create the base class that all drawing tools extend.",
+      "acceptanceCriteria": [
+        "Create js/tools/BaseTool.js as ES6 class",
+        "Abstract methods: onMouseDown(x,y), onMouseMove(x,y), onMouseUp(x,y), onKeyDown(key)",
+        "Properties: name, icon, cursor",
+        "Methods: activate(), deactivate()",
+        "Handles preview rendering on animation canvas"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "ToolManager with undo/redo",
+      "description": "Create the tool manager that handles tool switching and command history.",
+      "acceptanceCriteria": [
+        "Create js/tools/ToolManager.js as ES6 class",
+        "registerTool(tool), setActiveTool(name), getActiveTool()",
+        "Maintains command history array",
+        "addCommand(cmd) - adds to history and queues for animation",
+        "undo() - removes last command, redraws canvas",
+        "redo() - re-adds undone command",
+        "getCommands() - returns all commands (for save/export)"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "LineTool implementation",
+      "description": "Create the line drawing tool.",
+      "acceptanceCriteria": [
+        "Create js/tools/LineTool.js extending BaseTool",
+        "Click sets start point, drag shows preview line, release creates line",
+        "Preview line renders on animation canvas (cleared each frame)",
+        "On release, emits command: {type: 'line', x1, y1, x2, y2}",
+        "Register with ToolManager",
+        "Test: can draw lines in browser"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "RectTool implementation",
+      "description": "Create the rectangle drawing tool.",
+      "acceptanceCriteria": [
+        "Create js/tools/RectTool.js extending BaseTool",
+        "Click sets corner, drag to opposite corner, release creates rect",
+        "Preview rectangle on animation canvas while dragging",
+        "Emits command: {type: 'rect', x, y, width, height, filled: false}",
+        "Register with ToolManager",
+        "Test: can draw rectangles in browser"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "CircleTool implementation",
+      "description": "Create the circle drawing tool with bounding box interaction.",
+      "acceptanceCriteria": [
+        "Create js/tools/CircleTool.js extending BaseTool",
+        "Click sets bounding box corner, drag to opposite corner",
+        "Circle inscribed in bounding box (center at box center, radius = min(w,h)/2)",
+        "Preview circle on animation canvas while dragging",
+        "Emits command: {type: 'circle', cx, cy, radius, filled: false}",
+        "Register with ToolManager",
+        "Test: can draw circles in browser"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "ArcTool implementation",
+      "description": "Create the arc drawing tool with multi-step interaction.",
+      "acceptanceCriteria": [
+        "Create js/tools/ArcTool.js extending BaseTool",
+        "Step 1: Click and drag to set center and radius",
+        "Step 2: Move to set start angle, click to confirm",
+        "Step 3: Move to set end angle, click to complete",
+        "Preview arc updates during each step",
+        "Emits command: {type: 'arc', cx, cy, radius, startAngle, endAngle}",
+        "Register with ToolManager"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "Hershey vector font data",
+      "description": "Create stroke-based vector font for text rendering.",
+      "acceptanceCriteria": [
+        "Create js/fonts/hershey.js",
+        "Export HERSHEY_FONT object mapping characters to stroke arrays",
+        "Each character: { width: number, strokes: [[x1,y1,x2,y2], ...] }",
+        "Include A-Z, 0-9, common punctuation (. , ! ? - + = / : ; ' \" ( ) )",
+        "Coordinates normalized to character height of 1",
+        "Based on Hershey Simplex (public domain)"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "TextTool implementation",
+      "description": "Create the text drawing tool using vector font.",
+      "acceptanceCriteria": [
+        "Create js/tools/TextTool.js extending BaseTool",
+        "Click to place text cursor (shows blinking cursor)",
+        "Type characters, they render immediately as vector strokes",
+        "Backspace removes last character",
+        "Enter or Escape confirms text placement",
+        "Emits command: {type: 'text', x, y, text, scale}",
+        "Default scale: 1 (about 20px tall)"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "title": "FillTool with pattern fills",
+      "description": "Create the pattern fill tool.",
+      "acceptanceCriteria": [
+        "Create js/tools/FillTool.js extending BaseTool",
+        "Click inside a closed region to fill with pattern",
+        "Patterns: crosshatch, horizontal, vertical, diagonal45, diagonal135, dots",
+        "Uses flood-fill algorithm to find boundary",
+        "Emits command: {type: 'fill', x, y, pattern, boundaryCommands}",
+        "Pattern rendered as lines within boundary"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-015",
+      "title": "EraserTool implementation",
+      "description": "Create the eraser tool that removes elements.",
+      "acceptanceCriteria": [
+        "Create js/tools/EraserTool.js extending BaseTool",
+        "Click on a drawn element to erase it",
+        "Highlights element on hover (before click)",
+        "Uses hit-testing to find nearest command within threshold",
+        "Removes command from history and redraws canvas",
+        "Drag erases multiple elements touched"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-016",
+      "title": "Complete CSS styling",
+      "description": "Finish the dark theme CSS with all UI components.",
+      "acceptanceCriteria": [
+        "Update css/style.css with complete styling",
+        "Dark theme using color palette from PRD",
+        "Toolbar styles: 48px wide, icon buttons with hover states",
+        "Status bar styles: 32px tall, monospace font",
+        "Tool options panel styles (slide-out from toolbar)",
+        "Button styles, slider styles, checkbox styles",
+        "Responsive: works at 800x600 minimum"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-017",
+      "title": "Complete index.html layout",
+      "description": "Build the full UI layout for the drawing page.",
+      "acceptanceCriteria": [
+        "Update index.html with full layout per PRD wireframe",
+        "Header with title and minimal controls",
+        "Left toolbar with tool buttons (L, R, C, A, T, F, E icons)",
+        "Undo/Redo buttons in toolbar",
+        "Save/Open/Export buttons in toolbar",
+        "Canvas area fills remaining space",
+        "Status bar with speed slider, grid toggle, position display"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-018",
+      "title": "Wire up app.js with tool switching",
+      "description": "Connect all tools to UI buttons and keyboard shortcuts.",
+      "acceptanceCriteria": [
+        "Update js/app.js to initialize all components",
+        "Tool buttons click handlers - switch active tool",
+        "Keyboard shortcuts: L=Line, R=Rect, C=Circle, A=Arc, T=Text, F=Fill, E=Eraser",
+        "Ctrl+Z = undo, Ctrl+Shift+Z = redo",
+        "G = toggle grid",
+        "Space = pause/resume animation",
+        "Active tool button highlighted"
+      ],
+      "priority": 18,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-019",
+      "title": "Tool options panels",
+      "description": "Add per-tool options that appear when tool is selected.",
+      "acceptanceCriteria": [
+        "Create slide-out panel that shows when tool selected",
+        "LineTool: line style dropdown (solid, dashed, dotted)",
+        "RectTool/CircleTool: filled checkbox",
+        "TextTool: scale dropdown (0.5x, 1x, 2x, 3x)",
+        "FillTool: pattern dropdown",
+        "Options persist in localStorage",
+        "Panel slides in/out smoothly"
+      ],
+      "priority": 19,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-020",
+      "title": "Grid toggle and position display",
+      "description": "Implement the optional background grid and cursor position.",
+      "acceptanceCriteria": [
+        "Add drawGrid() method to TekCanvas",
+        "Grid: 50px spacing, --tek-dim color at 30% opacity",
+        "Grid toggle button in status bar",
+        "Grid state persists in localStorage",
+        "Position display shows cursor X,Y in pixels",
+        "Updates on mousemove over canvas"
+      ],
+      "priority": 20,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-021",
+      "title": "Speed slider control",
+      "description": "Implement the animation speed control.",
+      "acceptanceCriteria": [
+        "Speed slider in status bar",
+        "5 stops: Slowest (100), Slow (300), Normal (800), Fast (2000), Instant",
+        "Updates PlotAnimator speed in real-time",
+        "Shows current speed label",
+        "Speed persists in localStorage",
+        "Default: Normal (800 px/sec)"
+      ],
+      "priority": 21,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-022",
+      "title": "localStorage auto-save",
+      "description": "Auto-save drawing to localStorage.",
+      "acceptanceCriteria": [
+        "Create js/utils/storage.js",
+        "saveToLocalStorage(commands) - saves command array",
+        "loadFromLocalStorage() - returns command array or null",
+        "Auto-save on every new command (debounced 1sec)",
+        "Auto-load on page load, replay commands",
+        "Clear storage when user explicitly clears canvas"
+      ],
+      "priority": 22,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-023",
+      "title": "File save/load (JSON)",
+      "description": "Save and load drawings as .tek.json files.",
+      "acceptanceCriteria": [
+        "Add to js/utils/storage.js",
+        "saveToFile(commands) - triggers download of .tek.json",
+        "loadFromFile() - opens file picker, parses JSON, returns commands",
+        "File format per PRD: {version, created, modified, canvasAspect, commands}",
+        "Wire up Save/Open buttons in toolbar",
+        "Shows error toast if file invalid"
+      ],
+      "priority": 23,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-024",
+      "title": "PNG export",
+      "description": "Export drawing as PNG image.",
+      "acceptanceCriteria": [
+        "Create js/utils/export.js",
+        "exportPNG(canvas, options) - returns blob or triggers download",
+        "Options: scale (1 or 2), background (transparent or --tek-background)",
+        "Filename: tektronix-{timestamp}.png",
+        "Wire up Export button (or submenu with PNG/SVG choice)",
+        "Works correctly with HiDPI canvas"
+      ],
+      "priority": 24,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-025",
+      "title": "SVG export",
+      "description": "Export drawing as SVG vector file.",
+      "acceptanceCriteria": [
+        "Add to js/utils/export.js",
+        "exportSVG(commands, width, height) - returns SVG string or triggers download",
+        "Converts commands to SVG elements (line, circle, path, text)",
+        "Includes inline CSS for colors",
+        "ViewBox matches canvas aspect ratio",
+        "Filename: tektronix-{timestamp}.svg",
+        "Opens correctly in browser and Inkscape"
+      ],
+      "priority": 25,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-026",
+      "title": "Geometric gallery demos",
+      "description": "Create the geometric pattern demo graphics.",
+      "acceptanceCriteria": [
+        "Create js/gallery/graphics/geometric.js",
+        "Spirograph generator with R, r, d params",
+        "Lissajous curve generator with a, b, delta params",
+        "Rose curve (rhodonea) generator with n, d params",
+        "Fibonacci spiral generator",
+        "Each as generator function yielding draw commands",
+        "Export array of demo objects with id, name, category, params, generate()"
+      ],
+      "priority": 26,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-027",
+      "title": "3D wireframe gallery demos",
+      "description": "Create 3D wireframe demo graphics.",
+      "acceptanceCriteria": [
+        "Create js/gallery/graphics/threed.js",
+        "Wireframe cube (static or animated rotation)",
+        "Wireframe sphere",
+        "Wireframe torus",
+        "Simple 3D projection math (orthographic or perspective)",
+        "Each as generator function yielding line commands",
+        "Export array of demo objects"
+      ],
+      "priority": 27,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-028",
+      "title": "Data visualization gallery demos",
+      "description": "Create chart and graph demo graphics.",
+      "acceptanceCriteria": [
+        "Create js/gallery/graphics/data.js",
+        "Bar chart with animated bars growing",
+        "Line graph (stock-ticker style)",
+        "Pie chart with segments drawing in",
+        "Scatter plot",
+        "Sample data embedded in each demo",
+        "Export array of demo objects"
+      ],
+      "priority": 28,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-029",
+      "title": "Maps and astronomy gallery demos",
+      "description": "Create map and space demo graphics.",
+      "acceptanceCriteria": [
+        "Create js/gallery/graphics/maps.js",
+        "World map (simplified continent outlines)",
+        "USA state boundaries (simplified)",
+        "Earth globe (wireframe sphere with continent hints)",
+        "Solar system (orbits and planets)",
+        "Coordinate data can be simplified/stylized",
+        "Export array of demo objects"
+      ],
+      "priority": 29,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-030",
+      "title": "Technical gallery demos",
+      "description": "Create technical/engineering demo graphics.",
+      "acceptanceCriteria": [
+        "Create js/gallery/graphics/technical.js",
+        "Circuit schematic (simple logic gates)",
+        "Oscilloscope waveform (sine, square, sawtooth)",
+        "Logic gate diagram",
+        "Block diagram (boxes with connecting lines)",
+        "Export array of demo objects"
+      ],
+      "priority": 30,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-031",
+      "title": "GalleryManager for loading demos",
+      "description": "Create the gallery manager that loads and categorizes demos.",
+      "acceptanceCriteria": [
+        "Create js/gallery/GalleryManager.js",
+        "Imports all demo modules",
+        "getAllDemos() - returns flat array of all demos",
+        "getCategories() - returns category list",
+        "getDemosByCategory(cat) - filters demos",
+        "getDemoById(id) - returns single demo",
+        "generateThumbnail(demo) - renders small preview to canvas"
+      ],
+      "priority": 31,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-032",
+      "title": "GraphicPlayer for demo playback",
+      "description": "Create the player component for watching demos.",
+      "acceptanceCriteria": [
+        "Create js/gallery/GraphicPlayer.js",
+        "Takes demo object and canvas element",
+        "play(), pause(), restart() methods",
+        "setSpeed(pxPerSec) method",
+        "Renders demo using PlotAnimator",
+        "Parameter sliders update and restart demo",
+        "Emits 'complete' event when done"
+      ],
+      "priority": 32,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-033",
+      "title": "Gallery page HTML and CSS",
+      "description": "Build the gallery page layout.",
+      "acceptanceCriteria": [
+        "Update gallery.html with full layout",
+        "Header with title and link back to canvas",
+        "Category filter tabs/buttons",
+        "Grid of demo thumbnails (responsive grid)",
+        "Player view (replaces grid when demo selected)",
+        "Player controls: play/pause, restart, speed, params",
+        "Back button to return to grid"
+      ],
+      "priority": 33,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-034",
+      "title": "Gallery app.js wiring",
+      "description": "Wire up the gallery page functionality.",
+      "acceptanceCriteria": [
+        "Create js/gallery-app.js",
+        "Initialize GalleryManager, render thumbnail grid",
+        "Category filter click handlers",
+        "Thumbnail click opens player view",
+        "Player controls wired to GraphicPlayer",
+        "Back button returns to grid",
+        "URL updates with demo ID (allows direct linking)"
+      ],
+      "priority": 34,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-035",
+      "title": "Open in Editor feature",
+      "description": "Allow opening gallery demos in the drawing canvas.",
+      "acceptanceCriteria": [
+        "Add 'Open in Editor' button to player view",
+        "Generates all commands from demo (instant, no animation)",
+        "Stores commands in sessionStorage",
+        "Redirects to index.html",
+        "index.html checks sessionStorage, loads commands",
+        "User can edit/extend the demo drawing"
+      ],
+      "priority": 35,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-036",
+      "title": "Dockerfile and docker-compose",
+      "description": "Create Docker deployment configuration.",
+      "acceptanceCriteria": [
+        "Create Dockerfile using nginx:alpine",
+        "Copies static files to /usr/share/nginx/html",
+        "Create docker-compose.yml",
+        "Maps port 8080:80",
+        "docker-compose up builds and serves site",
+        "Site accessible at http://localhost:8080"
+      ],
+      "priority": 36,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-037",
+      "title": "README documentation",
+      "description": "Create project README with setup and usage.",
+      "acceptanceCriteria": [
+        "Create README.md",
+        "Project description and screenshot placeholder",
+        "Quick start: docker-compose up",
+        "Development: open index.html directly",
+        "Feature list with keyboard shortcuts",
+        "File format documentation",
+        "License (MIT)"
+      ],
+      "priority": 37,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-038",
+      "title": "Final polish and cleanup",
+      "description": "Final review and polish pass.",
+      "acceptanceCriteria": [
+        "Remove any console.log debug statements",
+        "Verify all keyboard shortcuts work",
+        "Test save/load/export cycle",
+        "Test all gallery demos play correctly",
+        "Verify responsive layout at various sizes",
+        "Add favicon.svg (simple vector terminal icon)",
+        "Verify Docker deployment works end-to-end"
+      ],
+      "priority": 38,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

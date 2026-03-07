@@ -1,0 +1,8 @@
+# Ralph Progress Log
+Started: 2026-03-07
+Project: Tektronix Graphics Terminal
+
+## Codebase Patterns
+(Add reusable patterns here as they are discovered)
+
+---
