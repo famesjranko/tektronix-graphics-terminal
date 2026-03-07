@@ -66,8 +66,8 @@
         "Emits 'complete' event when queue empties"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-07"
     },
     {
       "id": "US-005",
@@ -81,8 +81,8 @@
         "Console logs 'Animation complete' when done"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Completed 2026-03-07"
     },
     {
       "id": "US-006",

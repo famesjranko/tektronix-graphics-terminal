@@ -11,6 +11,8 @@ Project: Tektronix Graphics Terminal
 - TekCanvas exports getWidth()/getHeight() for sizing calculations
 - VectorRenderer: pass context + normalized coords, handles pixel conversion internally
 - VectorRenderer uses _crisp() for sharp 1px lines (Math.floor(coord) + 0.5)
+- PlotAnimator: use enqueue(command) to add commands, extends EventTarget for 'complete' event
+- PlotAnimator takes TekCanvas and VectorRenderer in constructor
 
 ---
 
@@ -54,4 +56,17 @@ Project: Tektronix Graphics Terminal
   - Coords are normalized 0-1, radius is relative to canvas width
   - filled parameter (default false) controls stroke vs fill for shapes
   - _crisp() method offsets by 0.5 for sharp 1px lines on pixel boundaries
+---
+
+## 2026-03-07 - US-005
+- What was implemented: Wired up PlotAnimator to app.js with test animation
+- Files changed:
+  - js/app.js - imports PlotAnimator, queues test commands for animated square with diagonals
+  - js/canvas/PlotAnimator.js - fixed naming conflict (queue method → enqueue, this.queue → this.commandQueue)
+- **Learnings for future iterations:**
+  - PlotAnimator.enqueue(command) adds to queue, animation starts automatically
+  - Command format: {type: 'line', x1, y1, x2, y2} for lines
+  - Listen for 'complete' event with addEventListener('complete', callback)
+  - Default speed is 800 px/sec, lines animate progressively
+  - Fixed bug: method named `queue()` conflicted with property `this.queue`
 ---

@@ -19,7 +19,7 @@ export class PlotAnimator extends EventTarget {
     this.renderer = renderer;
 
     // Command queue (FIFO)
-    this.queue = [];
+    this.commandQueue = [];
 
     // Animation state
     this.isAnimating = false;
@@ -53,8 +53,8 @@ export class PlotAnimator extends EventTarget {
    * Add a command to the queue
    * @param {Object} command - Draw command ({type, ...params})
    */
-  queue(command) {
-    this.queue.push(command);
+  enqueue(command) {
+    this.commandQueue.push(command);
 
     // Start processing if not already animating
     if (!this.isAnimating) {
@@ -123,8 +123,8 @@ export class PlotAnimator extends EventTarget {
     }
 
     // Complete all queued commands
-    while (this.queue.length > 0) {
-      const cmd = this.queue.shift();
+    while (this.commandQueue.length > 0) {
+      const cmd = this.commandQueue.shift();
       this._completeCommand(cmd);
     }
 
@@ -141,7 +141,7 @@ export class PlotAnimator extends EventTarget {
       cancelAnimationFrame(this.animationFrameId);
       this.animationFrameId = null;
     }
-    this.queue = [];
+    this.commandQueue = [];
     this.currentCommand = null;
     this.isAnimating = false;
     this.isPaused = false;
@@ -152,14 +152,14 @@ export class PlotAnimator extends EventTarget {
    * Process the next command in queue
    */
   _processNext() {
-    if (this.queue.length === 0) {
+    if (this.commandQueue.length === 0) {
       this.isAnimating = false;
       this._emitComplete();
       return;
     }
 
     this.isAnimating = true;
-    this.currentCommand = this.queue.shift();
+    this.currentCommand = this.commandQueue.shift();
     this.animationProgress = 0;
     this.animationStartTime = performance.now();
 
