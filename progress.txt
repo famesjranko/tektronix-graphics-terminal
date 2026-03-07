@@ -413,3 +413,20 @@ Project: Tektronix Graphics Terminal
   - Category is '3d' for 3D demos (matches PRD gallery categories)
   - Added pyramid as bonus demo using same edge-vertex pattern as cube
 ---
+
+## 2026-03-08 - US-028
+- What was implemented: Data visualization gallery demos with four chart types
+- Files changed:
+  - js/gallery/graphics/data.js - new file with 4 data visualization demos
+  - js/gallery-app.js - added import and test for dataDemos
+- **Learnings for future iterations:**
+  - Data demos follow same pattern: {id, name, category, description, thumbnail, params, *generate(params)}
+  - Category is 'data' for data visualization demos
+  - Bar chart: draws bars as filled rectangles using horizontal fill lines for texture
+  - Line graph: uses diamond shapes for data points, dashed trend line at end
+  - Pie chart: draws segments with radial lines + arc segments, includes label lines
+  - Scatter plot: supports 3 point styles (X, +, O), calculates linear regression for trend line
+  - Grid lines are drawn as dashed segments (alternating line segments)
+  - Sample data embedded directly in the module as constants (SAMPLE_BAR_DATA, etc.)
+  - All charts use normalized 0-1 coordinates with margins for axes (left=0.1-0.12, right=0.92, etc.)
+---
