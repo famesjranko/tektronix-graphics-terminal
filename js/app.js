@@ -16,7 +16,7 @@ import { TextTool } from './tools/TextTool.js';
 import { FillTool } from './tools/FillTool.js';
 import { EraserTool } from './tools/EraserTool.js';
 import { loadFromLocalStorage, clearLocalStorage, createAutoSave, saveToFile, loadFromFile } from './utils/storage.js';
-import { exportPNG } from './utils/export.js';
+import { exportPNG, exportSVG } from './utils/export.js';
 
 // Storage keys
 const TOOL_OPTIONS_KEY = 'tektronix-tool-options';
@@ -562,6 +562,19 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('export-png').addEventListener('click', () => handlePNGExport(1));
   document.getElementById('export-png-1x').addEventListener('click', () => handlePNGExport(1));
   document.getElementById('export-png-2x').addEventListener('click', () => handlePNGExport(2));
+
+  // SVG export handler
+  document.getElementById('export-svg').addEventListener('click', () => {
+    const commands = toolManager.getCommands();
+    const transparent = exportTransparentCheckbox.checked;
+    try {
+      exportSVG(commands, tekCanvas.getWidth(), tekCanvas.getHeight(), { transparent });
+      closeExportModal();
+      showToast('SVG exported successfully', 'success');
+    } catch (err) {
+      showToast('Export failed: ' + err.message, 'error');
+    }
+  });
 
   // Speed slider functionality
   const speedSlider = document.getElementById('speed-slider');
