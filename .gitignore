@@ -1,0 +1,18 @@
+# Ralph working files
+.last-branch
+archive/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# Debug logs
+*.log
+firebase-debug.log
