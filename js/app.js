@@ -439,11 +439,31 @@ document.addEventListener('DOMContentLoaded', () => {
     toolManager.loadCommands(commands, false);
   });
 
-  // Auto-load saved drawing from localStorage
-  const savedCommands = loadFromLocalStorage();
-  if (savedCommands && savedCommands.length > 0) {
-    console.log(`Restoring ${savedCommands.length} commands from localStorage`);
-    toolManager.loadCommands(savedCommands, false);
+  // Check for gallery transfer via sessionStorage (takes priority over localStorage)
+  const galleryTransferKey = 'tektronix-gallery-transfer';
+  const galleryCommands = sessionStorage.getItem(galleryTransferKey);
+
+  if (galleryCommands) {
+    // Load commands from gallery transfer
+    try {
+      const commands = JSON.parse(galleryCommands);
+      console.log(`Loading ${commands.length} commands from gallery`);
+      toolManager.loadCommands(commands, false);
+      // Clear sessionStorage after loading
+      sessionStorage.removeItem(galleryTransferKey);
+      // Save to localStorage so it persists
+      triggerAutoSave();
+    } catch (err) {
+      console.error('Failed to parse gallery transfer commands:', err);
+      sessionStorage.removeItem(galleryTransferKey);
+    }
+  } else {
+    // Auto-load saved drawing from localStorage
+    const savedCommands = loadFromLocalStorage();
+    if (savedCommands && savedCommands.length > 0) {
+      console.log(`Restoring ${savedCommands.length} commands from localStorage`);
+      toolManager.loadCommands(savedCommands, false);
+    }
   }
 
   // Function to clear canvas and localStorage

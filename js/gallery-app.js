@@ -233,14 +233,38 @@ function setupBackButton() {
 }
 
 /**
- * Set up "Open in Editor" button (placeholder for US-035)
+ * Set up "Open in Editor" button - transfers demo to drawing canvas
  */
 function setupOpenInEditor() {
   openInEditorBtn.addEventListener('click', () => {
-    // This will be implemented in US-035
-    // For now, show a message
-    console.log('Open in Editor - will be implemented in US-035');
-    alert('This feature will be available soon!');
+    if (!player) {
+      console.warn('No demo loaded to open in editor');
+      return;
+    }
+
+    // Get current demo and params
+    const demo = player.getDemo();
+    const params = player.getParams();
+
+    // Generate all commands from the demo (instant, no animation)
+    const commands = [];
+    const generator = demo.generate(params);
+    for (const cmd of generator) {
+      commands.push(cmd);
+    }
+
+    // Store commands in sessionStorage
+    const sessionKey = 'tektronix-gallery-transfer';
+    try {
+      sessionStorage.setItem(sessionKey, JSON.stringify(commands));
+      console.log(`Stored ${commands.length} commands for transfer to editor`);
+
+      // Redirect to the editor (index.html)
+      window.location.href = 'index.html';
+    } catch (err) {
+      console.error('Failed to store commands in sessionStorage:', err);
+      alert('Failed to open in editor. The demo may be too large.');
+    }
   });
 }
 

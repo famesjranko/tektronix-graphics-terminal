@@ -533,3 +533,16 @@ Project: Tektronix Graphics Terminal
   - hashchange event listener handles browser back/forward navigation
   - Speed slider uses indices 0-4 mapped to SPEED_VALUES [100, 300, 800, 2000, Infinity]
 ---
+
+## 2026-03-08 - US-035
+- What was implemented: Open in Editor feature to transfer gallery demos to the drawing canvas
+- Files changed:
+  - js/gallery-app.js - updated setupOpenInEditor() to generate commands and store in sessionStorage
+  - js/app.js - added sessionStorage check on load to receive gallery transfer commands
+- **Learnings for future iterations:**
+  - sessionStorage key 'tektronix-gallery-transfer' used for gallery-to-editor transfer
+  - demo.generate(params) is a generator that yields line commands, iterate to collect all
+  - sessionStorage transfer takes priority over localStorage auto-save on page load
+  - Clear sessionStorage after loading to prevent re-loading on subsequent visits
+  - After loading from gallery, trigger auto-save so commands persist in localStorage
+---
