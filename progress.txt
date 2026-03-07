@@ -119,3 +119,16 @@ Project: Tektronix Graphics Terminal
   - Keyboard shortcuts: use e.key.toLowerCase() for consistent Shift+key handling
   - mouseleave also triggers onMouseUp to handle dragging outside canvas
 ---
+
+## 2026-03-07 - US-009
+- What was implemented: RectTool for drawing rectangles with click-drag-release interaction
+- Files changed:
+  - js/tools/RectTool.js - new file extending BaseTool
+  - js/app.js - registered RectTool, added 'R' keyboard shortcut for tool switching
+- **Learnings for future iterations:**
+  - RectTool follows same pattern as LineTool: setCommandCallback, onMouseDown/Move/Up
+  - Rect command format: {type: 'rect', x, y, width, height, filled: false, color}
+  - Use _normalizeRect() to ensure x,y is always top-left (user can drag any direction)
+  - VectorRenderer.drawRect expects x, y, width, height in normalized 0-1 coords
+  - PlotAnimator already supports rect commands with perimeter animation
+---
