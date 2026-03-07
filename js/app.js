@@ -15,7 +15,7 @@ import { ArcTool } from './tools/ArcTool.js';
 import { TextTool } from './tools/TextTool.js';
 import { FillTool } from './tools/FillTool.js';
 import { EraserTool } from './tools/EraserTool.js';
-import { loadFromLocalStorage, clearLocalStorage, createAutoSave } from './utils/storage.js';
+import { loadFromLocalStorage, clearLocalStorage, createAutoSave, saveToFile, loadFromFile } from './utils/storage.js';
 
 // Storage keys
 const TOOL_OPTIONS_KEY = 'tektronix-tool-options';
@@ -456,6 +456,56 @@ document.addEventListener('DOMContentLoaded', () => {
   // Expose for debugging and potential clear button
   window.clearCanvas = clearCanvas;
 
+  // Toast notification function
+  function showToast(message, type = 'info', duration = 3000) {
+    // Remove existing toast if any
+    const existingToast = document.querySelector('.toast');
+    if (existingToast) {
+      existingToast.remove();
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    // Trigger reflow for animation
+    toast.offsetHeight;
+    toast.classList.add('show');
+
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 300);
+    }, duration);
+  }
+
+  // File input element for Open dialog
+  const fileInput = document.getElementById('file-input');
+
+  // Save button handler
+  document.getElementById('btn-save').addEventListener('click', () => {
+    const commands = toolManager.getCommands();
+    if (commands.length === 0) {
+      showToast('Nothing to save', 'info');
+      return;
+    }
+    const canvasAspect = tekCanvas.getWidth() / tekCanvas.getHeight();
+    saveToFile(commands, canvasAspect);
+    showToast('File saved', 'success');
+  });
+
+  // Open button handler
+  document.getElementById('btn-open').addEventListener('click', async () => {
+    const result = await loadFromFile(fileInput);
+    if (result.success) {
+      toolManager.loadCommands(result.commands, false);
+      triggerAutoSave();
+      showToast(`Loaded ${result.commands.length} commands`, 'success');
+    } else {
+      showToast(result.error, 'error', 4000);
+    }
+  });
+
   // Speed slider functionality
   const speedSlider = document.getElementById('speed-slider');
   const speedLabel = document.getElementById('speed-label');
@@ -504,6 +554,20 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       toolManager.redo();
       triggerAutoSave();
+      return;
+    }
+
+    // Save: Ctrl+S
+    if (e.ctrlKey && e.key === 's') {
+      e.preventDefault();
+      document.getElementById('btn-save').click();
+      return;
+    }
+
+    // Open: Ctrl+O
+    if (e.ctrlKey && e.key === 'o') {
+      e.preventDefault();
+      document.getElementById('btn-open').click();
       return;
     }
 

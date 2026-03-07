@@ -845,3 +845,40 @@ a:hover {
     padding: 2px 0;
   }
 }
+
+/* ==========================================================================
+   Toast Notifications
+   ========================================================================== */
+
+.toast {
+  position: fixed;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background-color: var(--tek-panel);
+  border: 1px solid var(--tek-border);
+  border-radius: 6px;
+  padding: 12px 20px;
+  color: var(--tek-text);
+  font-size: 13px;
+  z-index: 1000;
+  opacity: 0;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  max-width: 400px;
+  text-align: center;
+}
+
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.toast.error {
+  border-color: #FF6B6B;
+  color: #FF6B6B;
+}
+
+.toast.success {
+  border-color: var(--tek-primary);
+  color: var(--tek-primary);
+}
