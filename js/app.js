@@ -88,6 +88,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Set line tool as default active tool
   toolManager.setActiveTool('line');
+  updateActiveToolButton('line');
+
+  // Helper function to update active tool button highlighting
+  function updateActiveToolButton(toolName) {
+    // Remove active class from all tool buttons
+    document.querySelectorAll('.tool-btn[data-tool]').forEach(btn => {
+      btn.classList.remove('active');
+    });
+    // Add active class to the selected tool button
+    const activeBtn = document.querySelector(`.tool-btn[data-tool="${toolName}"]`);
+    if (activeBtn) {
+      activeBtn.classList.add('active');
+    }
+  }
+
+  // Helper function to switch tool and update UI
+  function switchTool(toolName) {
+    toolManager.setActiveTool(toolName);
+    updateActiveToolButton(toolName);
+  }
+
+  // Wire up tool button click handlers
+  document.querySelectorAll('.tool-btn[data-tool]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const toolName = btn.getAttribute('data-tool');
+      switchTool(toolName);
+    });
+  });
+
+  // Wire up undo/redo button click handlers
+  document.getElementById('btn-undo').addEventListener('click', () => {
+    toolManager.undo();
+  });
+
+  document.getElementById('btn-redo').addEventListener('click', () => {
+    toolManager.redo();
+  });
 
   // Wire up mouse events on the animation canvas (top layer)
   const canvas = tekCanvas.animationCanvas;
@@ -164,31 +201,50 @@ document.addEventListener('DOMContentLoaded', () => {
     // Tool switching shortcuts (only if tool didn't handle the key)
     const key = e.key.toLowerCase();
     if (key === 'l') {
-      toolManager.setActiveTool('line');
+      switchTool('line');
       return;
     }
     if (key === 'r') {
-      toolManager.setActiveTool('rect');
+      switchTool('rect');
       return;
     }
     if (key === 'c') {
-      toolManager.setActiveTool('circle');
+      switchTool('circle');
       return;
     }
     if (key === 'a') {
-      toolManager.setActiveTool('arc');
+      switchTool('arc');
       return;
     }
     if (key === 't') {
-      toolManager.setActiveTool('text');
+      switchTool('text');
       return;
     }
     if (key === 'f') {
-      toolManager.setActiveTool('fill');
+      switchTool('fill');
       return;
     }
     if (key === 'e') {
-      toolManager.setActiveTool('eraser');
+      switchTool('eraser');
+      return;
+    }
+
+    // Grid toggle
+    if (key === 'g') {
+      const gridToggle = document.getElementById('grid-toggle');
+      gridToggle.checked = !gridToggle.checked;
+      gridToggle.dispatchEvent(new Event('change'));
+      return;
+    }
+
+    // Pause/resume animation
+    if (e.key === ' ') {
+      e.preventDefault();
+      if (animator.isPaused) {
+        animator.resume();
+      } else {
+        animator.pause();
+      }
       return;
     }
   });

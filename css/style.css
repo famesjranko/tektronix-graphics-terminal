@@ -209,11 +209,13 @@ body {
   transition: transform 0.2s ease, opacity 0.2s ease;
   z-index: 10;
   overflow-y: auto;
+  pointer-events: none;
 }
 
 .options-panel.open {
   transform: translateX(0);
   opacity: 1;
+  pointer-events: auto;
 }
 
 .options-panel h3 {
