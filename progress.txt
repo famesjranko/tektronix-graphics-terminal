@@ -70,3 +70,18 @@ Project: Tektronix Graphics Terminal
   - Default speed is 800 px/sec, lines animate progressively
   - Fixed bug: method named `queue()` conflicted with property `this.queue`
 ---
+
+## 2026-03-07 - US-006
+- What was implemented: BaseTool abstract class for all drawing tools
+- Files changed:
+  - js/tools/BaseTool.js - new file with BaseTool class
+- **Learnings for future iterations:**
+  - BaseTool takes TekCanvas and VectorRenderer in constructor
+  - Subclasses MUST override: onMouseDown(x,y), onMouseMove(x,y), onMouseUp(x,y)
+  - Subclasses SHOULD override: onKeyDown(key) - default handles Escape to cancel
+  - Properties to set: name, icon, cursor (defaults: 'base', '?', 'crosshair')
+  - activate() sets cursor and active=true, deactivate() clears preview and resets cursor
+  - getPreviewContext() returns animation layer context for drawing previews
+  - clearPreview() clears the animation canvas layer
+  - setColor(color) sets the drawing color for the tool
+---
