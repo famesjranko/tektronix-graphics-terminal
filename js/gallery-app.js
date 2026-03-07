@@ -7,6 +7,7 @@
 import { COLORS } from './utils/colors.js';
 import { geometricDemos } from './gallery/graphics/geometric.js';
 import { threedDemos } from './gallery/graphics/threed.js';
+import { dataDemos } from './gallery/graphics/data.js';
 
 // Log startup to verify module loading works
 console.log('Tektronix Gallery initializing...');
@@ -31,5 +32,6 @@ function testDemos(demos, category) {
 // Test all demo categories
 testDemos(geometricDemos, 'Geometric');
 testDemos(threedDemos, '3D Wireframe');
+testDemos(dataDemos, 'Data Visualization');
 
 // Placeholder - GalleryManager will be initialized here in US-034
