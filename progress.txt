@@ -380,3 +380,20 @@ Project: Tektronix Graphics Terminal
   - Text is converted to line strokes using the hershey.js textToCommands function
   - Fill patterns are stored as .lines array on fill commands
 ---
+
+## 2026-03-08 - US-026
+- What was implemented: Geometric gallery demos with four mathematical curve generators
+- Files changed:
+  - js/gallery/graphics/geometric.js - new file with spirograph, lissajous, roseCurve, fibonacciSpiral generators
+  - js/gallery-app.js - added import and test of geometric demos
+- **Learnings for future iterations:**
+  - Gallery demos use generator functions (*generate) that yield line commands
+  - Demo format: {id, name, category, description, thumbnail, params, *generate(params)}
+  - Each param has: {default, min, max, step, label}
+  - Generators yield {type: 'line', x1, y1, x2, y2} commands for curves
+  - Spirograph uses hypotrochoid equations: x = (R-r)*cos(t) + d*cos((R-r)/r*t)
+  - Lissajous: x = A*sin(a*t+delta), y = A*sin(b*t)
+  - Rose curve: r = cos(n/d * theta) in polar coords
+  - Fibonacci spiral: quarter-circle arcs based on Fibonacci sequence with optional squares
+  - geometricDemos array exported as default for easy import by GalleryManager
+---
