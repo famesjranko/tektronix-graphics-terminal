@@ -12,6 +12,7 @@ import { LineTool } from './tools/LineTool.js';
 import { RectTool } from './tools/RectTool.js';
 import { CircleTool } from './tools/CircleTool.js';
 import { ArcTool } from './tools/ArcTool.js';
+import { TextTool } from './tools/TextTool.js';
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
@@ -65,6 +66,12 @@ document.addEventListener('DOMContentLoaded', () => {
     toolManager.addCommand(cmd);
   });
   toolManager.registerTool(arcTool);
+
+  const textTool = new TextTool(tekCanvas, renderer);
+  textTool.setCommandCallback((cmd) => {
+    toolManager.addCommand(cmd);
+  });
+  toolManager.registerTool(textTool);
 
   // Set line tool as default active tool
   toolManager.setActiveTool('line');
@@ -133,7 +140,15 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Tool switching shortcuts
+    // Pass to active tool first (for text input, etc.)
+    const tool = toolManager.getActiveTool();
+    if (tool && tool.onKeyDown(e.key)) {
+      // Tool handled the key, prevent default browser behavior
+      e.preventDefault();
+      return;
+    }
+
+    // Tool switching shortcuts (only if tool didn't handle the key)
     const key = e.key.toLowerCase();
     if (key === 'l') {
       toolManager.setActiveTool('line');
@@ -151,13 +166,11 @@ document.addEventListener('DOMContentLoaded', () => {
       toolManager.setActiveTool('arc');
       return;
     }
-
-    // Pass to active tool
-    const tool = toolManager.getActiveTool();
-    if (tool) {
-      tool.onKeyDown(e.key);
+    if (key === 't') {
+      toolManager.setActiveTool('text');
+      return;
     }
   });
 
-  console.log('Tools registered: LineTool (L), RectTool (R), CircleTool (C), ArcTool (A) - ready for drawing');
+  console.log('Tools registered: LineTool (L), RectTool (R), CircleTool (C), ArcTool (A), TextTool (T) - ready for drawing');
 });

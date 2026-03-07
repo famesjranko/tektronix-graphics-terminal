@@ -7,6 +7,7 @@
  */
 
 import { DEFAULT_COLOR } from '../utils/colors.js';
+import { textToCommands } from '../fonts/hershey.js';
 
 export class PlotAnimator extends EventTarget {
   /**
@@ -246,6 +247,17 @@ export class PlotAnimator extends EventTarget {
         const angle = Math.abs(command.endAngle - command.startAngle);
         return radius * angle;
       }
+      case 'text': {
+        // Get all the line commands for the text and sum their lengths
+        const lineCommands = textToCommands(command.text, command.x, command.y, command.scale || 1);
+        let totalLength = 0;
+        for (const lineCmd of lineCommands) {
+          const dx = (lineCmd.x2 - lineCmd.x1) * width;
+          const dy = (lineCmd.y2 - lineCmd.y1) * height;
+          totalLength += Math.sqrt(dx * dx + dy * dy);
+        }
+        return totalLength || 100;
+      }
       default:
         // Default to some reasonable length
         return 100;
@@ -273,6 +285,9 @@ export class PlotAnimator extends EventTarget {
         break;
       case 'arc':
         this._drawArcProgress(ctx, command, progress, color);
+        break;
+      case 'text':
+        this._drawTextProgress(ctx, command, progress, color);
         break;
       default:
         // Unknown command type - just complete it
@@ -342,6 +357,50 @@ export class PlotAnimator extends EventTarget {
   }
 
   /**
+   * Draw text with progress (stroke by stroke)
+   */
+  _drawTextProgress(ctx, command, progress, color) {
+    const lineCommands = textToCommands(command.text, command.x, command.y, command.scale || 1);
+
+    // Calculate total length for proportional progress
+    const width = this.tekCanvas.getWidth();
+    const height = this.tekCanvas.getHeight();
+    let totalLength = 0;
+    const lengths = [];
+
+    for (const lineCmd of lineCommands) {
+      const dx = (lineCmd.x2 - lineCmd.x1) * width;
+      const dy = (lineCmd.y2 - lineCmd.y1) * height;
+      const len = Math.sqrt(dx * dx + dy * dy);
+      lengths.push(len);
+      totalLength += len;
+    }
+
+    // Draw strokes up to progress
+    let drawnLength = 0;
+    const targetLength = progress * totalLength;
+
+    for (let i = 0; i < lineCommands.length; i++) {
+      const lineCmd = lineCommands[i];
+      const len = lengths[i];
+
+      if (drawnLength + len <= targetLength) {
+        // Draw complete stroke
+        this.renderer.drawLine(ctx, lineCmd.x1, lineCmd.y1, lineCmd.x2, lineCmd.y2, color);
+        drawnLength += len;
+      } else {
+        // Draw partial stroke
+        const remaining = targetLength - drawnLength;
+        const t = remaining / len;
+        const x2 = lineCmd.x1 + (lineCmd.x2 - lineCmd.x1) * t;
+        const y2 = lineCmd.y1 + (lineCmd.y2 - lineCmd.y1) * t;
+        this.renderer.drawLine(ctx, lineCmd.x1, lineCmd.y1, x2, y2, color);
+        break;
+      }
+    }
+  }
+
+  /**
    * Complete a command (draw to persistent layer)
    * @param {Object} command
    */
@@ -362,6 +421,13 @@ export class PlotAnimator extends EventTarget {
       case 'arc':
         this.renderer.drawArc(ctx, command.cx, command.cy, command.radius, command.startAngle, command.endAngle, color);
         break;
+      case 'text': {
+        const lineCommands = textToCommands(command.text, command.x, command.y, command.scale || 1);
+        for (const lineCmd of lineCommands) {
+          this.renderer.drawLine(ctx, lineCmd.x1, lineCmd.y1, lineCmd.x2, lineCmd.y2, color);
+        }
+        break;
+      }
     }
   }
 
