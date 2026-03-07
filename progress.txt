@@ -175,3 +175,19 @@ Project: Tektronix Graphics Terminal
   - baseHeight is 0.03 in normalized coords, scale parameter multiplies this
   - Unknown characters render as placeholder box
 ---
+
+## 2026-03-07 - US-013
+- What was implemented: TextTool for typing text rendered as vector strokes
+- Files changed:
+  - js/tools/TextTool.js - new file extending BaseTool with text entry state machine
+  - js/canvas/PlotAnimator.js - added text command handling with stroke animation
+  - js/app.js - registered TextTool, added 'T' shortcut, fixed keyboard handling priority
+- **Learnings for future iterations:**
+  - TextTool uses isEditing state to track when user is typing vs. idle
+  - Cursor blinks at 530ms interval using setInterval
+  - When tool is active and editing, onKeyDown returns true to prevent tool switching
+  - Pass keys to active tool FIRST before checking tool shortcuts (line 128-135 in app.js)
+  - PlotAnimator text animation: convert text to line commands via textToCommands(), animate stroke-by-stroke
+  - Text command format: {type: 'text', x, y, text, scale, color}
+  - setScale(scale) method allows changing text size (for future tool options panel)
+---
