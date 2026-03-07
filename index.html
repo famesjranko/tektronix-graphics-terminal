@@ -7,9 +7,103 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <div class="canvas-container" id="canvas-container">
-    <!-- Canvases will be created by TekCanvas.js -->
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <h1>Tektronix Graphics Terminal</h1>
+      <div class="header-controls">
+        <a href="gallery.html" class="btn btn-icon" data-tooltip="Gallery">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        </a>
+        <button class="btn btn-icon" id="help-btn" data-tooltip="Help (?)">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9 9a3 3 0 1 1 4 2.83V14"/><circle cx="12" cy="18" r="0.5"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main content area -->
+    <main class="app-main">
+      <!-- Left toolbar -->
+      <aside class="toolbar">
+        <!-- Drawing tools -->
+        <div class="toolbar-group">
+          <button class="tool-btn active" id="tool-line" data-tool="line" data-tooltip="Line (L)">L</button>
+          <button class="tool-btn" id="tool-rect" data-tool="rect" data-tooltip="Rectangle (R)">R</button>
+          <button class="tool-btn" id="tool-circle" data-tool="circle" data-tooltip="Circle (C)">C</button>
+          <button class="tool-btn" id="tool-arc" data-tool="arc" data-tooltip="Arc (A)">A</button>
+          <button class="tool-btn" id="tool-text" data-tool="text" data-tooltip="Text (T)">T</button>
+          <button class="tool-btn" id="tool-fill" data-tool="fill" data-tooltip="Fill (F)">F</button>
+          <button class="tool-btn" id="tool-eraser" data-tool="eraser" data-tooltip="Eraser (E)">E</button>
+        </div>
+
+        <!-- Undo/Redo -->
+        <div class="toolbar-group">
+          <button class="tool-btn" id="btn-undo" data-tooltip="Undo (Ctrl+Z)">
+            <svg viewBox="0 0 24 24"><path d="M3 10h10a5 5 0 0 1 5 5v2"/><polyline points="7 14 3 10 7 6"/></svg>
+          </button>
+          <button class="tool-btn" id="btn-redo" data-tooltip="Redo (Ctrl+Shift+Z)">
+            <svg viewBox="0 0 24 24"><path d="M21 10H11a5 5 0 0 0-5 5v2"/><polyline points="17 14 21 10 17 6"/></svg>
+          </button>
+        </div>
+
+        <!-- Spacer to push file controls to bottom -->
+        <div class="toolbar-spacer"></div>
+
+        <!-- File operations -->
+        <div class="toolbar-group">
+          <button class="tool-btn" id="btn-save" data-tooltip="Save (Ctrl+S)">
+            <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          </button>
+          <button class="tool-btn" id="btn-open" data-tooltip="Open (Ctrl+O)">
+            <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          </button>
+          <button class="tool-btn" id="btn-export" data-tooltip="Export (Ctrl+E)">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Tool options panel (slides out when tool selected) -->
+      <div class="options-panel" id="options-panel">
+        <h3 id="options-title">Tool Options</h3>
+        <!-- Options content populated by JS based on active tool -->
+        <div id="options-content"></div>
+      </div>
+
+      <!-- Canvas area -->
+      <div class="canvas-wrapper">
+        <div class="canvas-container" id="canvas-container">
+          <!-- Canvases created by TekCanvas.js -->
+        </div>
+      </div>
+    </main>
+
+    <!-- Status bar -->
+    <footer class="status-bar">
+      <div class="status-item">
+        <label for="speed-slider">Speed</label>
+        <div class="slider-container">
+          <input type="range" id="speed-slider" min="0" max="4" value="2" step="1">
+          <span class="status-value" id="speed-label">Normal</span>
+        </div>
+      </div>
+
+      <div class="status-item">
+        <label class="checkbox-container">
+          <input type="checkbox" id="grid-toggle">
+          <span class="checkmark"></span>
+          <span class="checkbox-label">Grid (G)</span>
+        </label>
+      </div>
+
+      <div class="status-spacer"></div>
+
+      <div class="position-display" id="position-display">X: --- Y: ---</div>
+    </footer>
   </div>
+
+  <!-- Hidden file input for Open dialog -->
+  <input type="file" id="file-input" accept=".tek.json,.json" class="hidden">
 
   <script type="module" src="js/app.js"></script>
 </body>
