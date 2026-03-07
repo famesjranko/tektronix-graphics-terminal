@@ -9,6 +9,7 @@ import { VectorRenderer } from './canvas/VectorRenderer.js';
 import { PlotAnimator } from './canvas/PlotAnimator.js';
 import { ToolManager } from './tools/ToolManager.js';
 import { LineTool } from './tools/LineTool.js';
+import { RectTool } from './tools/RectTool.js';
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
@@ -44,6 +45,12 @@ document.addEventListener('DOMContentLoaded', () => {
     toolManager.addCommand(cmd);
   });
   toolManager.registerTool(lineTool);
+
+  const rectTool = new RectTool(tekCanvas, renderer);
+  rectTool.setCommandCallback((cmd) => {
+    toolManager.addCommand(cmd);
+  });
+  toolManager.registerTool(rectTool);
 
   // Set line tool as default active tool
   toolManager.setActiveTool('line');
@@ -112,6 +119,17 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    // Tool switching shortcuts
+    const key = e.key.toLowerCase();
+    if (key === 'l') {
+      toolManager.setActiveTool('line');
+      return;
+    }
+    if (key === 'r') {
+      toolManager.setActiveTool('rect');
+      return;
+    }
+
     // Pass to active tool
     const tool = toolManager.getActiveTool();
     if (tool) {
@@ -119,5 +137,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  console.log('LineTool registered and ready for drawing');
+  console.log('Tools registered: LineTool (L), RectTool (R) - ready for drawing');
 });
