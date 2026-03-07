@@ -5,37 +5,59 @@
  */
 
 import { COLORS } from './utils/colors.js';
-import { geometricDemos } from './gallery/graphics/geometric.js';
-import { threedDemos } from './gallery/graphics/threed.js';
-import { dataDemos } from './gallery/graphics/data.js';
-import { mapsDemos } from './gallery/graphics/maps.js';
-import { technicalDemos } from './gallery/graphics/technical.js';
+import { GalleryManager } from './gallery/GalleryManager.js';
 
 // Log startup to verify module loading works
 console.log('Tektronix Gallery initializing...');
 console.log('Color palette loaded:', COLORS);
 
-// Helper to test demos
-function testDemos(demos, category) {
-  console.log(`${category} demos loaded:`, demos.length);
+// Initialize GalleryManager
+const galleryManager = new GalleryManager();
+
+// Test GalleryManager methods
+console.log('--- GalleryManager Tests ---');
+
+// Test getAllDemos()
+const allDemos = galleryManager.getAllDemos();
+console.log(`getAllDemos(): ${allDemos.length} total demos`);
+
+// Test getCategories()
+const categories = galleryManager.getCategories();
+console.log('getCategories():', categories);
+
+// Test getDemosByCategory() for each category
+for (const category of categories) {
+  const demos = galleryManager.getDemosByCategory(category.id);
+  console.log(`getDemosByCategory('${category.id}'): ${demos.length} demos`);
   demos.forEach(demo => {
-    console.log(`  - ${demo.id}: ${demo.name} (${demo.category})`);
-    // Test generator produces commands
-    const generator = demo.generate(
-      Object.fromEntries(
-        Object.entries(demo.params).map(([key, param]) => [key, param.default])
-      )
-    );
-    const firstCmd = generator.next().value;
-    console.log(`    First command:`, firstCmd);
+    console.log(`  - ${demo.id}: ${demo.name}`);
   });
 }
 
-// Test all demo categories
-testDemos(geometricDemos, 'Geometric');
-testDemos(threedDemos, '3D Wireframe');
-testDemos(dataDemos, 'Data Visualization');
-testDemos(mapsDemos, 'Maps & Astronomy');
-testDemos(technicalDemos, 'Technical');
+// Test getDemoById() with first demo
+const firstDemo = allDemos[0];
+const foundDemo = galleryManager.getDemoById(firstDemo.id);
+console.log(`getDemoById('${firstDemo.id}'):`, foundDemo ? foundDemo.name : 'NOT FOUND');
 
-// Placeholder - GalleryManager will be initialized here in US-034
+// Test getDemoById() with invalid ID
+const notFound = galleryManager.getDemoById('invalid-demo-id');
+console.log(`getDemoById('invalid-demo-id'):`, notFound === null ? 'null (correct)' : 'ERROR');
+
+// Test generateThumbnail() - create a sample thumbnail
+console.log('Testing generateThumbnail()...');
+const thumbnailCanvas = galleryManager.generateThumbnail(firstDemo);
+console.log(`Thumbnail generated: ${thumbnailCanvas.width}x${thumbnailCanvas.height} (physical pixels)`);
+
+// Test generateThumbnailDataURL()
+const dataURL = galleryManager.generateThumbnailDataURL(firstDemo);
+console.log(`Thumbnail data URL length: ${dataURL.length} chars`);
+
+// Test getDemoCount() and getCategoryCount()
+console.log(`getDemoCount(): ${galleryManager.getDemoCount()}`);
+for (const category of categories) {
+  console.log(`getCategoryCount('${category.id}'): ${galleryManager.getCategoryCount(category.id)}`);
+}
+
+console.log('--- GalleryManager Tests Complete ---');
+
+// Placeholder - Full gallery UI will be wired up in US-034
