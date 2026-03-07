@@ -243,3 +243,17 @@ Project: Tektronix Graphics Terminal
   - Tooltips via [data-tooltip] attribute with ::after pseudo-element
   - Min dimensions enforced: 800x600px
 ---
+
+## 2026-03-07 - US-017
+- What was implemented: Complete index.html layout with full UI structure
+- Files changed:
+  - index.html - complete layout per PRD wireframe
+- **Learnings for future iterations:**
+  - Layout: .app-container > .app-header + .app-main (contains .toolbar + .canvas-wrapper) + .status-bar
+  - Tool buttons have data-tool attribute and IDs like "tool-line", "tool-rect", etc.
+  - Undo/Redo/Save/Open/Export buttons have IDs like "btn-undo", "btn-redo", etc.
+  - Options panel has id="options-panel" with #options-title and #options-content for dynamic content
+  - Status bar: #speed-slider (range 0-4), #speed-label, #grid-toggle (checkbox), #position-display
+  - Hidden #file-input for file open dialog
+  - All SVG icons are inline with viewBox="0 0 24 24" and stroke styling from CSS
+---
