@@ -397,3 +397,19 @@ Project: Tektronix Graphics Terminal
   - Fibonacci spiral: quarter-circle arcs based on Fibonacci sequence with optional squares
   - geometricDemos array exported as default for easy import by GalleryManager
 ---
+
+## 2026-03-08 - US-027
+- What was implemented: 3D wireframe gallery demos with perspective projection
+- Files changed:
+  - js/gallery/graphics/threed.js - new file with 4 wireframe demos
+  - js/gallery-app.js - added import and test for threedDemos
+- **Learnings for future iterations:**
+  - 3D demos follow same pattern as geometric: {id, name, category, description, thumbnail, params, *generate(params)}
+  - 3D projection uses perspective formula: scale = fov / (distance + z), then x' = 0.5 + x*scale
+  - Rotation uses standard rotation matrices: rotateX, rotateY, rotateZ functions
+  - Sphere uses latitude (phi) and longitude (theta) parametric equations
+  - Torus uses (R + r*cos(phi))*cos(theta) for x, r*sin(phi) for y
+  - All 3D demos output line commands only - no special 3D command types needed
+  - Category is '3d' for 3D demos (matches PRD gallery categories)
+  - Added pyramid as bonus demo using same edge-vertex pattern as cube
+---
