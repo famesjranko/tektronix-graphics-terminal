@@ -802,6 +802,35 @@ a:hover {
   gap: 8px;
 }
 
+.player-controls .toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--tek-dim);
+  text-transform: uppercase;
+}
+
+.player-controls .toggle-label input[type="checkbox"] {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--tek-border);
+  background-color: var(--tek-background);
+  cursor: pointer;
+}
+
+.player-controls .toggle-label input[type="checkbox"]:checked {
+  background-color: var(--tek-primary);
+  border-color: var(--tek-primary);
+}
+
+.player-controls .toggle-label input[type="checkbox"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .player-controls .param-sliders {
   display: flex;
   gap: 16px;

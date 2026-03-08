@@ -151,12 +151,13 @@ export const wireframeSphere = {
   params: {
     rotationX: { default: 0.4, min: 0, max: 6.28, step: 0.1, label: 'X Rotation' },
     rotationY: { default: 0.3, min: 0, max: 6.28, step: 0.1, label: 'Y Rotation' },
+    size: { default: 0.3, min: 0.15, max: 0.4, step: 0.02, label: 'Size' },
     latitudeLines: { default: 8, min: 4, max: 16, step: 1, label: 'Latitude lines' },
     longitudeLines: { default: 12, min: 6, max: 24, step: 1, label: 'Longitude lines' }
   },
   *generate(params) {
-    const { rotationX, rotationY, latitudeLines, longitudeLines } = params;
-    const radius = 0.3;
+    const { rotationX, rotationY, size, latitudeLines, longitudeLines } = params;
+    const radius = size;
     const segments = 32; // Line segments per circle
 
     // Draw latitude lines (horizontal circles)
@@ -338,11 +339,12 @@ export const wireframePyramid = {
     rotationX: { default: 0.3, min: 0, max: 6.28, step: 0.1, label: 'X Rotation' },
     rotationY: { default: 0.5, min: 0, max: 6.28, step: 0.1, label: 'Y Rotation' },
     rotationZ: { default: 0, min: 0, max: 6.28, step: 0.1, label: 'Z Rotation' },
+    size: { default: 0.2, min: 0.1, max: 0.35, step: 0.02, label: 'Size' },
     height: { default: 0.35, min: 0.2, max: 0.5, step: 0.02, label: 'Height' }
   },
   *generate(params) {
-    const { rotationX, rotationY, rotationZ, height } = params;
-    const baseSize = 0.2;
+    const { rotationX, rotationY, rotationZ, size, height } = params;
+    const baseSize = size;
 
     // Define pyramid vertices
     // Base corners at y = height/2, apex at y = -height/2

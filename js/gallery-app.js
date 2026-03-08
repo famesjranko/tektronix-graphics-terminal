@@ -19,6 +19,9 @@ const SPEED_LABELS = ['Slowest', 'Slow', 'Normal', 'Fast', 'Instant'];
 let galleryManager;
 let player = null;
 let currentCategory = 'all';
+let animationFrameId = null;
+let isAnimating = false;
+let savedSpeed = null;
 
 // DOM elements
 let demoGrid;
@@ -36,6 +39,8 @@ let backBtn;
 let speedSlider;
 let speedLabel;
 let openInEditorBtn;
+let animateToggle;
+let animateControl;
 
 /**
  * Clear all children from an element
@@ -67,6 +72,8 @@ function init() {
   speedSlider = document.getElementById('player-speed');
   speedLabel = document.getElementById('player-speed-label');
   openInEditorBtn = document.getElementById('open-in-editor-btn');
+  animateToggle = document.getElementById('animate-toggle');
+  animateControl = document.getElementById('animate-control');
 
   // Initialize GalleryManager
   galleryManager = new GalleryManager();
@@ -79,6 +86,7 @@ function init() {
   setupPlayerControls();
   setupBackButton();
   setupOpenInEditor();
+  setupAnimateToggle();
 
   // Check URL for direct demo link
   handleUrlHash();
@@ -265,6 +273,89 @@ function setupOpenInEditor() {
 }
 
 /**
+ * Set up animate toggle handler
+ */
+function setupAnimateToggle() {
+  animateToggle.addEventListener('change', () => {
+    if (animateToggle.checked) {
+      startContinuousRotation();
+    } else {
+      stopContinuousRotation();
+    }
+  });
+}
+
+/**
+ * Start continuous rotation animation
+ */
+function startContinuousRotation() {
+  if (!player) return;
+
+  const demo = player.getDemo();
+  // Only for demos with rotation params
+  if (!demo.params?.rotationY) {
+    animateToggle.checked = false;
+    return;
+  }
+
+  isAnimating = true;
+  savedSpeed = player.getSpeed();
+  player.setSpeed(Infinity);
+
+  const rotationSpeed = 0.02; // ~1.15 deg/frame
+
+  function animate() {
+    if (!isAnimating || !player) return;
+
+    const params = player.getParams();
+    if (params.rotationY !== undefined) {
+      params.rotationY = (params.rotationY + rotationSpeed) % (2 * Math.PI);
+    }
+    if (params.rotationX !== undefined) {
+      params.rotationX = (params.rotationX + rotationSpeed * 0.3) % (2 * Math.PI);
+    }
+
+    player.setParams(params);
+    updateRotationSliders(params);
+
+    animationFrameId = requestAnimationFrame(animate);
+  }
+
+  animationFrameId = requestAnimationFrame(animate);
+}
+
+/**
+ * Stop continuous rotation animation
+ */
+function stopContinuousRotation() {
+  isAnimating = false;
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId);
+    animationFrameId = null;
+  }
+  if (savedSpeed !== null && player) {
+    player.setSpeed(savedSpeed);
+    savedSpeed = null;
+  }
+}
+
+/**
+ * Update rotation sliders to reflect current values during animation
+ */
+function updateRotationSliders(params) {
+  for (const key of ['rotationX', 'rotationY', 'rotationZ']) {
+    if (params[key] !== undefined) {
+      const slider = document.getElementById(`param-${key}`);
+      if (slider) {
+        slider.value = params[key];
+        const valueDisplay = slider.parentElement.querySelector('.param-value');
+        if (valueDisplay) valueDisplay.textContent = formatParamValue(params[key]);
+      }
+    }
+  }
+}
+
+/**
  * Open a demo in the player view
  * @param {string} demoId - Demo ID to open
  */
@@ -273,6 +364,12 @@ function openDemo(demoId) {
   if (!demo) {
     console.error(`Demo not found: ${demoId}`);
     return;
+  }
+
+  // Reset animate toggle when switching demos
+  if (animateToggle) {
+    animateToggle.checked = false;
+    stopContinuousRotation();
   }
 
   // Update URL hash
@@ -292,6 +389,13 @@ function openDemo(demoId) {
 
   // Render parameter sliders
   renderParamSliders(demo);
+
+  // Enable/disable animate toggle based on rotation params
+  if (animateToggle && animateControl) {
+    const hasRotation = demo.params?.rotationY !== undefined;
+    animateToggle.disabled = !hasRotation;
+    animateControl.style.opacity = hasRotation ? '1' : '0.5';
+  }
 
   // Show player view FIRST so container has dimensions
   galleryMain.classList.add('player-active');
@@ -320,6 +424,12 @@ function openDemo(demoId) {
  * Close the player view and return to grid
  */
 function closePlayer() {
+  // Stop any running animation
+  stopContinuousRotation();
+  if (animateToggle) {
+    animateToggle.checked = false;
+  }
+
   // Clear URL hash
   history.pushState(null, '', window.location.pathname);
 
@@ -384,6 +494,12 @@ function createParamSlider(name, param) {
 
   // Update on input
   input.addEventListener('input', () => {
+    // Stop animation if user manually adjusts a slider
+    if (isAnimating) {
+      animateToggle.checked = false;
+      stopContinuousRotation();
+    }
+
     const value = parseFloat(input.value);
     valueDisplay.textContent = formatParamValue(value);
 
