@@ -108,9 +108,11 @@ export class TekCanvas {
    * @returns {{x: number, y: number}} Normalized coordinates
    */
   toNormalized(x, y) {
+    const scale = this.getScale();
+    const offset = this.getOffset();
     return {
-      x: x / this.width,
-      y: y / this.height
+      x: (x - offset.x) / scale,
+      y: (y - offset.y) / scale
     };
   }
 
@@ -121,9 +123,11 @@ export class TekCanvas {
    * @returns {{x: number, y: number}} Pixel coordinates
    */
   fromNormalized(x, y) {
+    const scale = this.getScale();
+    const offset = this.getOffset();
     return {
-      x: x * this.width,
-      y: y * this.height
+      x: x * scale + offset.x,
+      y: y * scale + offset.y
     };
   }
 
@@ -141,6 +145,26 @@ export class TekCanvas {
    */
   getHeight() {
     return this.height;
+  }
+
+  /**
+   * Get uniform scale factor (uses smaller dimension to preserve aspect ratio)
+   * @returns {number}
+   */
+  getScale() {
+    return Math.min(this.width, this.height);
+  }
+
+  /**
+   * Get offset for centering content with uniform scaling
+   * @returns {{x: number, y: number}}
+   */
+  getOffset() {
+    const scale = this.getScale();
+    return {
+      x: (this.width - scale) / 2,
+      y: (this.height - scale) / 2
+    };
   }
 
   /**

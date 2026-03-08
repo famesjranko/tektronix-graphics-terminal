@@ -132,8 +132,14 @@ export class GalleryManager {
     ctx.fillStyle = COLORS.background;
     ctx.fillRect(0, 0, width, height);
 
-    // Helper for coordinate conversion (normalized 0-1 to pixels)
-    const toPixel = (normalized, dimension) => normalized * dimension;
+    // Uniform scaling to preserve aspect ratio
+    const scale = Math.min(width, height);
+    const offsetX = (width - scale) / 2;
+    const offsetY = (height - scale) / 2;
+
+    // Helper for coordinate conversion (normalized 0-1 to pixels with uniform scaling)
+    const toPixelX = normalized => normalized * scale + offsetX;
+    const toPixelY = normalized => normalized * scale + offsetY;
 
     // Helper for crisp 1px lines
     const crisp = coord => Math.floor(coord) + 0.5;
@@ -158,7 +164,7 @@ export class GalleryManager {
       if (commandCount >= maxCommands) break;
       commandCount++;
 
-      this._drawCommand(ctx, cmd, width, height, toPixel, crisp);
+      this._drawCommand(ctx, cmd, scale, toPixelX, toPixelY, crisp);
     }
 
     return canvas;
@@ -168,17 +174,17 @@ export class GalleryManager {
    * Draw a single command to a canvas context
    * @private
    */
-  _drawCommand(ctx, cmd, width, height, toPixel, crisp) {
+  _drawCommand(ctx, cmd, scale, toPixelX, toPixelY, crisp) {
     const color = cmd.color || DEFAULT_COLOR;
     ctx.strokeStyle = color;
     ctx.fillStyle = color;
 
     switch (cmd.type) {
       case 'line': {
-        const x1 = toPixel(cmd.x1, width);
-        const y1 = toPixel(cmd.y1, height);
-        const x2 = toPixel(cmd.x2, width);
-        const y2 = toPixel(cmd.y2, height);
+        const x1 = toPixelX(cmd.x1);
+        const y1 = toPixelY(cmd.y1);
+        const x2 = toPixelX(cmd.x2);
+        const y2 = toPixelY(cmd.y2);
 
         // Handle line style
         if (cmd.style === 'dashed') {
@@ -198,10 +204,10 @@ export class GalleryManager {
       }
 
       case 'rect': {
-        const x = toPixel(cmd.x, width);
-        const y = toPixel(cmd.y, height);
-        const w = toPixel(cmd.width, width);
-        const h = toPixel(cmd.height, height);
+        const x = toPixelX(cmd.x);
+        const y = toPixelY(cmd.y);
+        const w = cmd.width * scale;
+        const h = cmd.height * scale;
 
         if (cmd.filled) {
           ctx.fillRect(x, y, w, h);
@@ -212,9 +218,9 @@ export class GalleryManager {
       }
 
       case 'circle': {
-        const cx = toPixel(cmd.cx, width);
-        const cy = toPixel(cmd.cy, height);
-        const r = cmd.radius * width;
+        const cx = toPixelX(cmd.cx);
+        const cy = toPixelY(cmd.cy);
+        const r = cmd.radius * scale;
 
         ctx.beginPath();
         ctx.arc(cx, cy, r, 0, Math.PI * 2);
@@ -227,9 +233,9 @@ export class GalleryManager {
       }
 
       case 'arc': {
-        const cx = toPixel(cmd.cx, width);
-        const cy = toPixel(cmd.cy, height);
-        const r = cmd.radius * width;
+        const cx = toPixelX(cmd.cx);
+        const cy = toPixelY(cmd.cy);
+        const r = cmd.radius * scale;
 
         ctx.beginPath();
         ctx.arc(cx, cy, r, cmd.startAngle, cmd.endAngle);
@@ -248,10 +254,10 @@ export class GalleryManager {
         // Fill commands contain pre-computed lines
         if (cmd.lines && Array.isArray(cmd.lines)) {
           for (const line of cmd.lines) {
-            const x1 = toPixel(line.x1, width);
-            const y1 = toPixel(line.y1, height);
-            const x2 = toPixel(line.x2, width);
-            const y2 = toPixel(line.y2, height);
+            const x1 = toPixelX(line.x1);
+            const y1 = toPixelY(line.y1);
+            const x2 = toPixelX(line.x2);
+            const y2 = toPixelY(line.y2);
 
             ctx.beginPath();
             ctx.moveTo(crisp(x1), crisp(y1));

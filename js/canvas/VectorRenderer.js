@@ -80,7 +80,7 @@ export class VectorRenderer {
    */
   drawCircle(ctx, cx, cy, r, color = DEFAULT_COLOR, filled = false) {
     const center = this.tekCanvas.fromNormalized(cx, cy);
-    const radius = r * this.tekCanvas.getWidth();
+    const radius = r * this.tekCanvas.getScale();
 
     this._prepareContext(ctx);
     ctx.beginPath();
@@ -139,7 +139,7 @@ export class VectorRenderer {
    */
   drawArc(ctx, cx, cy, r, startAngle, endAngle, color = DEFAULT_COLOR) {
     const center = this.tekCanvas.fromNormalized(cx, cy);
-    const radius = r * this.tekCanvas.getWidth();
+    const radius = r * this.tekCanvas.getScale();
 
     this._prepareContext(ctx);
     ctx.strokeStyle = color;
