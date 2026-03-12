@@ -2,9 +2,6 @@
 
 A web application recreating the Tektronix vector graphics terminal experience. Draw vector graphics with animated line plotting, browse a gallery of classic terminal-style demos, and watch graphics render line-by-line as they would on original hardware.
 
-![Tektronix Graphics Terminal Screenshot](screenshot.png)
-*Screenshot placeholder - replace with actual screenshot*
-
 ## Features
 
 - **Vector Drawing Tools** - Line, Rectangle, Circle, Arc, Text, Fill, and Eraser
